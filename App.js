@@ -1,16 +1,19 @@
+import { NavigationContainer } from '@react-navigation/native';
+import Navigation from './scr/components/Navigation';
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View } from 'react-native';
-import Login from './scr/display/authentication/login';
-import BottomNav from './scr/components/BottomNav';
-import { NavigationContainer } from "@react-navigation/native";
+import { AuthProvider } from './scr/context/AuthContext';
 
 export default function App() {
   return (
     <NavigationContainer>
-      <BottomNav/>
+      <AuthProvider>
+        <Navigation />
+      </AuthProvider>
     </NavigationContainer>
   );
 }
+
 
 const styles = StyleSheet.create({
   container: {

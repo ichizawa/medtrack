@@ -9,7 +9,7 @@ import {
   FlatList,
 } from "react-native";
 
-export default function Menu() {
+export default function Menu({navigation}) {
   const data = [
     {
       id: 1,
