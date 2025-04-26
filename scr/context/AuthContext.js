@@ -5,7 +5,7 @@ export const AuthContext = createContext();
 
 export const AuthProvider = ({children}) => {
     const [userInfo, setUserInfo] = useState(null);
-    const login = async (username, password) => {
+    const login = (username, password) => {
         try {
             // ${BASE_URL}login
             fetch(`${BASE_URL}login`, {
@@ -21,7 +21,7 @@ export const AuthProvider = ({children}) => {
             })
             .then(processResponse)
             .then(res => {
-                // const {statusCode, data} = res;
+                const {statusCode, data} = res;
                 console.log(res);
                 // if(statusCode === 200) {
                 //     setUserInfo(data.user);
