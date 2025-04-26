@@ -1,12 +1,15 @@
 import { StyleSheet, Text, View, Image, ScrollView, SafeAreaView, TouchableOpacity, Alert } from 'react-native';
-import React from 'react';
+import React, { useContext } from 'react';
 import { Ionicons } from '@expo/vector-icons';
+import { AuthContext } from '../../context/AuthContext';
 
-export default function Profile({navigation}) {
+export default function Profile() {
+  const {userInfo, logout} = useContext(AuthContext);
+
   const handleLogout = () => {
     Alert.alert('Logout', 'Are you sure you want to logout?', [
       { text: 'Cancel', style: 'cancel' },
-      { text: 'Logout', onPress: () => console.log('User logged out') },
+      { text: 'Logout', onPress: () => logout() },
     ]);
   };
 
@@ -25,13 +28,14 @@ export default function Profile({navigation}) {
                 style={styles.avatar}
               /> */}
             </View>
-            <Text style={styles.name}>Juan Dela Cruz</Text>
+            <Text style={styles.name}>{userInfo.first_name} {userInfo.last_name}</Text>
             <Text style={styles.role}>BS Information Technology</Text>
           </View>
 
           <View style={styles.infoSection}>
-            <ProfileItem label="Student ID" value="2023-00123" />
-            <ProfileItem label="Email" value="juan.delacruz@umindanao.edu.ph" />
+            <ProfileItem label="Student ID" value={userInfo.student_id} />
+            <ProfileItem label="Email" value={userInfo.email} />
+            <ProfileItem label="Username" value={userInfo.username} />
             <ProfileItem label="Contact Number" value="+63 987 654 3210" />
             <ProfileItem label="School" value="UM Digos College" />
           </View>

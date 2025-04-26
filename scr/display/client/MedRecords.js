@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {
   StyleSheet,
   Text,
@@ -10,10 +10,40 @@ import {
   Image,
 } from "react-native";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
+import { AuthContext } from "../../context/AuthContext";
+import { BASE_URL, processResponse } from "../../config";
+import { FlatList } from "react-native-web";
 
 const { width, height } = Dimensions.get("window");
 
-export default function MedRecords({navigation}) {
+export default function MedRecords({ navigation }) {
+  const { userInfo } = useContext(AuthContext);
+  const [data, setData] = useState([]);
+
+  const getRecords = () => {
+    try {
+      fetch(`${BASE_URL}get-medical-records/${userInfo.id}`, {
+        method: "GET",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+      })
+        .then(processResponse)
+        .then((res) => {
+          const { statusCode, data } = res;
+          // console.log(data.records);
+          setData(data.records);
+        });
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
+  useEffect(() => {
+    getRecords();
+  }, []);
+
   return (
     <View style={styles.container}>
       <View style={styles.searchContainer}>
@@ -38,7 +68,7 @@ export default function MedRecords({navigation}) {
 
       <View style={styles.cardProgress}>
         <Text style={{ fontWeight: "600" }}>Medical Records Completion</Text>
-        
+
         <Text style={{ fontSize: 14, marginTop: 8 }}>
           7 of 10 records completed
         </Text>
@@ -52,112 +82,58 @@ export default function MedRecords({navigation}) {
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false}>
-        {[
-          {
-            title: "Hepatitis B Vaccine",
-            date: "Feb 10, 2025 - Apr 9, 2025",
-            file: "hepatitisb_vaccine.pdf",
-            status: "Expiring soon",
-          },
-          {
-            title: "COVID-19 Test",
-            date: "Jan 15, 2025 - Feb 10, 2025",
-            file: "covid19_test.pdf",
-            status: "Expired",
-          },
-          {
-            title: "Annual Checkup",
-            date: "Mar 5, 2025 - Apr 5, 2025",
-            file: "annual_checkup.pdf",
-            status: "Completed",
-          },
-          {
-            title: "Flu Vaccine",
-            date: "Dec 10, 2024 - Jan 5, 2025",
-            file: "flu_vaccine.pdf",
-            status: "Expiring soon",
-          },
-          {
-            title: "Cholesterol Test",
-            date: "Nov 20, 2024 - Dec 15, 2024",
-            file: "cholesterol_test.pdf",
-            status: "Expired",
-          },
-          {
-            title: "Blood Pressure Monitoring",
-            date: "Mar 1, 2025 - Mar 25, 2025",
-            file: "bp_monitoring.pdf",
-            status: "Completed",
-          },
-          {
-            title: "Malaria Test",
-            date: "Oct 15, 2024 - Nov 15, 2024",
-            file: "malaria_test.pdf",
-            status: "Expiring soon",
-          },
-          {
-            title: "HIV Test",
-            date: "Feb 20, 2025 - Mar 20, 2025",
-            file: "hiv_test.pdf",
-            status: "Expired",
-          },
-          {
-            title: "Diabetes Test",
-            date: "Jan 5, 2025 - Feb 5, 2025",
-            file: "diabetes_test.pdf",
-            status: "Completed",
-          },
-          {
-            title: "X-Ray Result",
-            date: "Sep 1, 2024 - Sep 20, 2024",
-            file: "xray_result.pdf",
-            status: "Completed",
-          },
-        ].map((data, i) => (
-          <View key={i} style={styles.card}>
-            <View style={styles.cardTop}>
-              <Image
-                source={require("../../../assets/doc_type/x-ray.png")}
-                style={styles.cardImage}
-              />
-
-              <View style={styles.cardInfo}>
-                <Text style={styles.recordTitle} numberOfLines={1}>
-                  {data.title}
-                </Text>{" "}
-                <Text style={styles.recordDate}>{data.date}</Text>
-                <Text style={styles.recordFile} numberOfLines={1}>
-                  {data.file}
-                </Text>
-              </View>
-
-              <View
-                style={[
-                  styles.statusTag,
-                  styles[data.status.replace(/\s/g, "").toLowerCase()],
-                ]}
-              >
-                <Text style={styles.statusText}>{data.status}</Text>
-              </View>
-
-              <MaterialIcons
-                name="more-vert"
-                size={22}
-                color="#444"
-                style={{ marginLeft: 5 }}
-              />
-            </View>
-
-            <TouchableOpacity>
-              <Text style={styles.viewMore}>View more</Text>
-            </TouchableOpacity>
+        {Array.isArray(data) && data.length === 0 ? (
+          <View style={styles.noRecords}>
+            <Text style={styles.noRecordsText}>No Records Found</Text>
           </View>
-        ))}
+        ) : (
+          data.map((data, i) => (
+            // console.log(data),
+            <View key={i} style={styles.card}>
+              <View style={styles.cardTop}>
+                <Image
+                  source={require("../../../assets/doc_type/x-ray.png")}
+                  style={styles.cardImage}
+                />
+
+                <View style={styles.cardInfo}>
+                  <Text style={styles.recordTitle} numberOfLines={1}>
+                    {data.document_type}
+                  </Text>
+                  <Text style={styles.recordDate}>{data.entry_date}</Text>
+                  <Text style={styles.recordFile} numberOfLines={1}>
+                    {data.file_name}
+                  </Text>
+                </View>
+
+                <View
+                  style={[
+                    styles.statusTag,
+                    styles[data.status.replace(/\s/g, "").toLowerCase()],
+                  ]}
+                >
+                  <Text style={styles.statusText}>{data.status}</Text>
+                </View>
+
+                <MaterialIcons
+                  name="more-vert"
+                  size={22}
+                  color="#444"
+                  style={{ marginLeft: 5 }}
+                />
+              </View>
+
+              <TouchableOpacity>
+                <Text style={styles.viewMore}>View more</Text>
+              </TouchableOpacity>
+            </View>
+          ))
+        )}
       </ScrollView>
 
       <TouchableOpacity
         style={styles.addfile}
-        onPress={() => navigation.navigate('NewMedicalRecord')}
+        onPress={() => navigation.navigate("NewMedicalRecord")}
       >
         <Ionicons name="add" size={28} color="#fff" />
       </TouchableOpacity>
@@ -215,7 +191,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     borderRadius: 8,
     padding: 15,
-    marginBottom: 15
+    marginBottom: 15,
   },
   cardTop: {
     flexDirection: "row",

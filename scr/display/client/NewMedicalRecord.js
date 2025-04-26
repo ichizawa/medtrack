@@ -23,16 +23,15 @@ export default function NewMedicalRecord({ navigation }) {
   const [notes, setNotes] = useState('');
 
   const documentTypes = [
-    'Vaccine',
-    'COVID-19 Test',
-    'Hepatitis B Vaccine',
-    'Flu Vaccine',
-    'Annual Checkup',
-    'Blood Test',
-    'X-Ray',
-    'MRI Scan',
-    'Dental Record',
-    'Eye Exam',
+    { key: 1, value: 'Flu Vaccine' },
+    { key: 2, value: 'Pneumococcal Vaccine' },
+    { key: 3, value: 'Hepatitis B Vaccine' },
+    { key: 4, value: 'Covid-19 Vaccine' },
+    { key: 5, value: 'X-Ray Result' },
+    { key: 6, value: 'CBC Result' },
+    { key: 7, value: 'Urine Test' },
+    { key: 8, value: 'Fetal Test' },
+    { key: 9, value: 'Stool Series' }
   ];
 
   const pickDocument = async () => {
@@ -83,7 +82,13 @@ export default function NewMedicalRecord({ navigation }) {
       />
       
       <Text style={styles.label}>Document Type</Text>
-      <TouchableOpacity 
+      <SelectList 
+        style={styles.dropdown}
+        setSelected={(val) => setShowDocumentTypes(val)} 
+        data={documentTypes} 
+        save="value"
+    />
+      {/* <TouchableOpacity 
         style={styles.dropdown}
         onPress={() => setShowDocumentTypes(!showDocumentTypes)}
       >
@@ -91,9 +96,9 @@ export default function NewMedicalRecord({ navigation }) {
           {documentType || 'Select document type'}
         </Text>
         <Ionicons name="chevron-down" size={20} color="#007BFF" />
-      </TouchableOpacity>
+      </TouchableOpacity> */}
       
-      {showDocumentTypes && (
+      {/* {showDocumentTypes && (
         <View style={styles.dropdownList}>
           {documentTypes.map((type, index) => (
             <TouchableOpacity
@@ -108,7 +113,7 @@ export default function NewMedicalRecord({ navigation }) {
             </TouchableOpacity>
           ))}
         </View>
-      )}
+      )} */}
       
       <View style={styles.previewContainer}>
         {file && file.name && (

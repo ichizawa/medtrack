@@ -3,7 +3,7 @@ import React, { useContext } from "react";
 
 import MedRecords from "../display/client/MedRecords";
 import Notification from "../display/client/Notification";
-import Profile from "../display/client/Profile";
+import Profile from "../display/client/profile";
 import BrowseExpiration from "../display/client/BrowseExpiration";
 import NewMedicalRecord from "../display/client/NewMedicalRecord";
 import Login from "../Login";
@@ -22,7 +22,6 @@ export default function Navigation() {
         <>
           <Stack.Screen name="Login" component={Login} />
           <Stack.Screen name="Register" component={Register} />
-          <Stack.Screen name="Home" component={ClientHome} />
         </>
       ) : (
         <>

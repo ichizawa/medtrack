@@ -4,7 +4,7 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import HomeScreen from "./index";
 import MedRecords from "./MedRecords";
 import Notification from "./Notification";
-import Profile from "./Profile";
+import Profile from "./profile";
 const { width, height } = Dimensions.get("window");
 
 const Tab = createBottomTabNavigator();

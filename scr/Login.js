@@ -23,8 +23,8 @@ const window_height = Dimensions.get("window").height;
 
 export default function Login({ navigation }) {
   const { login } = useContext(AuthContext);
-  const [email, setEmail] = useState("user@example.com");
-  const [password, setPassword] = useState("password");
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
   const [isRememberMe, setIsRememberMe] = useState(false);
   const [dimensions, setDimensions] = useState({
     window_width: Dimensions.get("window").width,
@@ -46,8 +46,8 @@ export default function Login({ navigation }) {
   const handleLogin = () => {
     // For static login, we'll just navigate to Home
     // You can still call the login function if you want to maintain the context
-    login(email, password);
-    navigation.navigate('Home');
+    login(username, password);
+    // navigation.navigate('Home');
   };
 
   // Determine if we're on a tablet/desktop or phone based on width
@@ -91,17 +91,17 @@ export default function Login({ navigation }) {
               isLargeScreen && styles.formContainerLarge
             ]}>
               <View style={styles.inputContainer}>
-                <Text style={styles.inputLabel}>Email</Text>
+                <Text style={styles.inputLabel}>Username</Text>
                 <TextInput
                   style={[
                     styles.input,
                     isLargeScreen && styles.inputLarge
                   ]}
-                  value={email}
-                  onChangeText={setEmail}
-                  placeholder="Enter your email"
+                  // value={username}
+                  onChangeText={setUsername}
+                  placeholder="Enter your username"
                   placeholderTextColor="#AED5EA"
-                  keyboardType="email-address"
+                  // keyboardType="email-address"
                   autoCapitalize="none"
                 />
               </View>
@@ -113,7 +113,7 @@ export default function Login({ navigation }) {
                     styles.input,
                     isLargeScreen && styles.inputLarge
                   ]}
-                  value={password}
+                  // value={password}
                   onChangeText={setPassword}
                   placeholder="Enter your password"
                   placeholderTextColor="#AED5EA"

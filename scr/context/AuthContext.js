@@ -5,35 +5,62 @@ export const AuthContext = createContext();
 
 export const AuthProvider = ({children}) => {
     const [userInfo, setUserInfo] = useState(null);
-    const login = (email, password) => {
+    const login = async (username, password) => {
         try {
-            fetch(`${BASE_URL}login`, {
+            // ${BASE_URL}login
+            // fetch(`http://medtrack-brook.ct.ws/test.php`, {
+            //     method: 'POST',
+            //     headers: {
+            //         'Accept': 'application/json',
+            //         'Content-Type': 'application/json',
+            //     },
+            //     body: JSON.stringify({
+            //         username: username,
+            //         password: password
+            //     })
+            // })
+            // .then(processResponse)
+            // .then(res => {
+            //     // const {statusCode, data} = res;
+            //     console.log(res);
+            //     // if(statusCode === 200) {
+            //     //     setUserInfo(data.user);
+            //     // }else {
+            //     //     alert(data.error);
+            //     // }
+            // })
+            // .catch((e) => 
+            //     console.log(e)
+            // );
+            fetch('http://medtrack-brook.ct.ws/index.php/api/login', {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json',
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    email: email,
+                    username: username,
                     password: password
-                })
+                }),
             })
-            .then(processResponse)
-            .then(res => {
-                const {statusCode, data} = res;
-                // console.log(statusCode);
-                 console.log(data);
-                if(statusCode === 200) {
-                    setUserInfo(data);
-
-                }else {
-                    alert(data.error);
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(response.body);
+                }
+                return response.text(); 
+            })
+            .then(text => {
+                console.log(text); // Check what's actually returned
+                try {
+                    const data = JSON.parse(text); // Try to parse as JSON
+                    console.log(data);
+                } catch (e) {
+                    console.error("Response wasn't valid JSON:", text);
                 }
             })
-            .catch((e) => 
-            // console.log(data)
-            console.log(e)
-            )
+            .catch(error => {
+                console.error('There was a problem with the fetch operation:', error);
+            });
         } catch (e) {
             console.log(e);
         }
@@ -79,15 +106,14 @@ export const AuthProvider = ({children}) => {
                 headers: {
                     'Accept': 'application/json',
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${userInfo.token}`
                 },
                 //body: JSON.stringify({})
             })
             .then(processResponse)
             .then(res => {
                 const {statusCode, data} = res;
-                if(statusCode === 200) {
-                    console.log(data);
+                if(statusCode == 200) {
+                    // console.log(data);
                     setUserInfo(null);
                 }
                 console.log(data);

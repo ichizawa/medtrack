@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import {
   StyleSheet,
   Text,
@@ -21,6 +21,7 @@ import {
   MaterialIcons,
   Entypo,
 } from "@expo/vector-icons";
+import { AuthContext } from '../../context/AuthContext'
 
 // Enable LayoutAnimation for Android
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
@@ -52,6 +53,7 @@ const upcomingExpirations = [
 ];
 
 export default function Index() {
+  const {userInfo} = useContext(AuthContext);
   const navigation = useNavigation();
   const [expandedItem, setExpandedItem] = useState(null);
   const { width, height } = useWindowDimensions();
@@ -143,7 +145,7 @@ export default function Index() {
         <View style={styles.topBar}>
           <View>
             <Text style={styles.greeting}>Hello,</Text>
-            <Text style={styles.headerTitle}>Lowela!</Text>
+            <Text style={styles.headerTitle}>{userInfo.first_name}!</Text>
           </View>
           <View style={styles.rightIcons}>
             <Ionicons
