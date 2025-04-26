@@ -22,12 +22,12 @@ export const AuthProvider = ({children}) => {
             .then(processResponse)
             .then(res => {
                 const {statusCode, data} = res;
-                console.log(res);
-                // if(statusCode === 200) {
-                //     setUserInfo(data.user);
-                // }else {
-                //     alert(data.error);
-                // }
+                // console.log(res);
+                if(statusCode === 200) {
+                    setUserInfo(data.user);
+                }else {
+                    alert(data.error);
+                }
             })
             .catch((e) => 
                 console.log(e)
