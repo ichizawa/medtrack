@@ -8,31 +8,7 @@ export const AuthProvider = ({children}) => {
     const login = async (username, password) => {
         try {
             // ${BASE_URL}login
-            // fetch(`http://medtrack-brook.ct.ws/test.php`, {
-            //     method: 'POST',
-            //     headers: {
-            //         'Accept': 'application/json',
-            //         'Content-Type': 'application/json',
-            //     },
-            //     body: JSON.stringify({
-            //         username: username,
-            //         password: password
-            //     })
-            // })
-            // .then(processResponse)
-            // .then(res => {
-            //     // const {statusCode, data} = res;
-            //     console.log(res);
-            //     // if(statusCode === 200) {
-            //     //     setUserInfo(data.user);
-            //     // }else {
-            //     //     alert(data.error);
-            //     // }
-            // })
-            // .catch((e) => 
-            //     console.log(e)
-            // );
-            fetch('http://medtrack-brook.ct.ws/index.php/api/login', {
+            fetch(`${BASE_URL}login`, {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json',
@@ -41,26 +17,22 @@ export const AuthProvider = ({children}) => {
                 body: JSON.stringify({
                     username: username,
                     password: password
-                }),
+                })
             })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(response.body);
-                }
-                return response.text(); 
+            .then(processResponse)
+            .then(res => {
+                // const {statusCode, data} = res;
+                console.log(res);
+                // if(statusCode === 200) {
+                //     setUserInfo(data.user);
+                // }else {
+                //     alert(data.error);
+                // }
             })
-            .then(text => {
-                console.log(text); // Check what's actually returned
-                try {
-                    const data = JSON.parse(text); // Try to parse as JSON
-                    console.log(data);
-                } catch (e) {
-                    console.error("Response wasn't valid JSON:", text);
-                }
-            })
-            .catch(error => {
-                console.error('There was a problem with the fetch operation:', error);
-            });
+            .catch((e) => 
+                console.log(e)
+            );
+        
         } catch (e) {
             console.log(e);
         }
