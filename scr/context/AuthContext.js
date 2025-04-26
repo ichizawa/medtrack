@@ -7,7 +7,6 @@ export const AuthProvider = ({children}) => {
     const [userInfo, setUserInfo] = useState(null);
     const login = (username, password) => {
         try {
-            // ${BASE_URL}login
             fetch(`${BASE_URL}login`, {
                 method: 'POST',
                 headers: {
@@ -37,7 +36,8 @@ export const AuthProvider = ({children}) => {
             console.log(e);
         }
     }
-    const register = (email, password) => {
+    const register = (form) => {
+        const { stud_id, fname, lname, username, phone, email, password, confirmPassword } = form;
         try {
             fetch(`${BASE_URL}register`, {
                 method: 'POST',
@@ -46,16 +46,13 @@ export const AuthProvider = ({children}) => {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
+                    first_name: fname,
+                    last_name: lname,
+                    student_id: stud_id, 
+                    username: username,
+                    phone: phone,
                     email: email,
-                    password: password,
-                    user_type: 1, 
-                    first_name: 'test',
-                    last_name: 'test',
-                    middle_name: 'test',
-                    contact_no: '0000',
-                    address: '',
-                    lat: '0000',
-                    long: '0000',
+                    password: password
                 })
             })
             .then(processResponse)

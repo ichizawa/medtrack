@@ -12,7 +12,6 @@ import {
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { AuthContext } from "../../context/AuthContext";
 import { BASE_URL, processResponse } from "../../config";
-import { FlatList } from "react-native-web";
 
 const { width, height } = Dimensions.get("window");
 
@@ -25,15 +24,20 @@ export default function MedRecords({ navigation }) {
       fetch(`${BASE_URL}get-medical-records/${userInfo.id}`, {
         method: "GET",
         headers: {
-          Accept: "application/json",
+          "Accept": "application/json",
           "Content-Type": "application/json",
         },
       })
         .then(processResponse)
         .then((res) => {
           const { statusCode, data } = res;
-          // console.log(data.records);
-          setData(data.records);
+          console.log(data);
+          if(statusCode == 200) {
+            setData(data.records);
+          }else{
+            setData([]);
+          }
+          // setData(data.records);
         });
     } catch (e) {
       console.log(e);
@@ -70,14 +74,14 @@ export default function MedRecords({ navigation }) {
         <Text style={{ fontWeight: "600" }}>Medical Records Completion</Text>
 
         <Text style={{ fontSize: 14, marginTop: 8 }}>
-          7 of 10 records completed
+          {data.length ?? 0} of 10 records completed
         </Text>
       </View>
 
       <View style={styles.recordsHeader}>
         <Text style={styles.headerTitle}>Medical Records</Text>
         <View style={styles.totalBadge}>
-          <Text style={styles.totalText}>21 Total</Text>
+          <Text style={styles.totalText}>{data.length ?? 0}</Text>
         </View>
       </View>
 
