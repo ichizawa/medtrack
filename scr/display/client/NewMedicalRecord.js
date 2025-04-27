@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import {
   StyleSheet,
   Text,
@@ -13,8 +13,12 @@ import { Ionicons } from "@expo/vector-icons";
 import * as DocumentPicker from "expo-document-picker";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { SelectList } from "react-native-dropdown-select-list";
+import { BASE_URL, processResponse } from "../../config";
+import * as FileSystem from 'expo-file-system';
+import { AuthContext } from "../../context/AuthContext";
 
 export default function NewMedicalRecord({ navigation }) {
+  const { userInfo } = useContext(AuthContext);
   const [recordName, setRecordName] = useState("");
   const [documentType, setDocumentType] = useState("");
   const [showDocumentTypes, setShowDocumentTypes] = useState(false);
@@ -44,9 +48,6 @@ export default function NewMedicalRecord({ navigation }) {
         multiple: false,
       });
       setFile(result.assets);
-      // if (!result.canceled && result.assets && result.assets.length > 0) {
-      //   setFile(result.assets[0]); // Only one file allowed
-      // }
     } catch (err) {
       console.log("Error picking document:", err);
     }
@@ -58,18 +59,34 @@ export default function NewMedicalRecord({ navigation }) {
     setExpirationDate(currentDate);
   };
 
-  const handleUpload = () => {
-    // Here you would implement the actual upload logic
-    console.log('Uploading:', {
-      recordName,
-      documentType,
-      file,
-      expirationDate,
-      notes,
-    });
-    console.log(file[0].name);
+  const handleUpload = async () => {
+    const base64 = await FileSystem.readAsStringAsync(file[0].uri, { encoding: FileSystem.EncodingType.Base64 });
 
-    // Navigate back after upload
+    fetch(`${BASE_URL}add-medical-record`, {
+      method: "POST",
+      headers: {
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        user_id: userInfo.id,
+        record_name: recordName,
+        document_type: documentType,
+        note: notes,
+        exp_date: expirationDate,
+        file: {
+          name: file[0].name,
+          type: file[0].mimeType,
+          data: base64
+        },
+      }),
+    })
+    .then(processResponse)
+    .then((res) => {
+      const { statusCode, data } = res;
+      console.log(data);
+    });
+
     // navigation.goBack();
   };
 

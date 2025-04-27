@@ -31,7 +31,7 @@ export default function MedRecords({ navigation }) {
         .then(processResponse)
         .then((res) => {
           const { statusCode, data } = res;
-          console.log(data);
+          // console.log(data);
           if(statusCode == 200) {
             setData(data.records);
           }else{

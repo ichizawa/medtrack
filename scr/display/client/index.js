@@ -22,6 +22,7 @@ import {
   Entypo,
 } from "@expo/vector-icons";
 import { AuthContext } from '../../context/AuthContext'
+import { BASE_URL, processResponse } from "../../config";
 
 // Enable LayoutAnimation for Android
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
@@ -59,6 +60,7 @@ export default function Index() {
   const { width, height } = useWindowDimensions();
   const [dimensions, setDimensions] = useState({ width, height });
   
+  const [counts, setCounts] = useState(null);
   // Handle screen rotation and size changes
   useEffect(() => {
     const subscription = Dimensions.addEventListener("change", ({ window }) => {
@@ -136,6 +138,29 @@ export default function Index() {
     </View>
   );
 
+  const getInfoCard = () => {
+    fetch(`${BASE_URL}dashboard/${userInfo.id}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        'Accept': 'application/json'
+      },
+    })
+    .then(processResponse)
+    .then((res) => {
+      const { statusCode, data } = res;
+      if(statusCode == 200){
+        setCounts(data.data);
+      }else{
+        setCounts(null);
+      }
+    });
+  }
+
+  useEffect(() => {
+    getInfoCard();
+  }, []);
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView 
@@ -171,7 +196,7 @@ export default function Index() {
                     style={styles.iconSumCard}
                   />
                 </View>
-                <Text style={styles.completedNumber}>21</Text>
+                <Text style={styles.completedNumber}>{counts?.completed ?? 0}</Text>
               </View>
 
               <View style={styles.cardItemRight}>
@@ -181,7 +206,7 @@ export default function Index() {
                     style={styles.iconSumCard}
                   />
                 </View>
-                <Text style={styles.expiredNumber}>7</Text>
+                <Text style={styles.expiredNumber}>{counts?.expired ?? 0}</Text>
               </View>
             </View>
             <View style={styles.rowText}>
@@ -196,7 +221,7 @@ export default function Index() {
                     style={styles.iconSumCard}
                   />
                 </View>
-                <Text style={styles.totalNumber}>45</Text>
+                <Text style={styles.totalNumber}>{counts?.total ?? 0}</Text>
               </View>
               <View style={styles.cardItemRight}>
                 <View style={styles.iconPendingBg}>
@@ -205,7 +230,7 @@ export default function Index() {
                     style={styles.iconSumCard}
                   />
                 </View>
-                <Text style={styles.pendingNumber}>3</Text>
+                <Text style={styles.pendingNumber}>{counts?.pending ?? 0}</Text>
               </View>
             </View>
             <View style={styles.row}>
