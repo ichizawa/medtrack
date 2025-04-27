@@ -12,6 +12,7 @@ import {
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { AuthContext } from "../../context/AuthContext";
 import { BASE_URL, processResponse } from "../../config";
+import Pusher from 'pusher-js';
 
 const { width, height } = Dimensions.get("window");
 
@@ -46,6 +47,15 @@ export default function MedRecords({ navigation }) {
 
   useEffect(() => {
     getRecords();
+
+    const pusher = new Pusher('a1d97d939eb60c02f4e0', {
+      cluster: 'ap1',
+    });
+    
+    const channel = pusher.subscribe('my-record');
+    channel.bind('upload-record', (data) => {
+      getRecords();
+    });
   }, []);
 
   return (

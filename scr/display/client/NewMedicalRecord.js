@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {
   StyleSheet,
   Text,
@@ -14,7 +14,7 @@ import * as DocumentPicker from "expo-document-picker";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { SelectList } from "react-native-dropdown-select-list";
 import { BASE_URL, processResponse } from "../../config";
-import * as FileSystem from 'expo-file-system';
+import * as FileSystem from "expo-file-system";
 import { AuthContext } from "../../context/AuthContext";
 
 export default function NewMedicalRecord({ navigation }) {
@@ -26,6 +26,8 @@ export default function NewMedicalRecord({ navigation }) {
   const [expirationDate, setExpirationDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [notes, setNotes] = useState("");
+  const [filteredDocumentTypes, setFilteredDocumentTypes] =
+    useState(documentTypes);
 
   const documentTypes = [
     { key: 1, value: "Flu Vaccine" },
@@ -59,13 +61,48 @@ export default function NewMedicalRecord({ navigation }) {
     setExpirationDate(currentDate);
   };
 
+  const getMedicalRecordPending = () => {
+    try {
+      fetch(`${BASE_URL}get-medical-records/${userInfo.id}`, {
+        method: "GET",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+      })
+        .then(processResponse)
+        .then((res) => {
+          const { statusCode, data } = res;
+          console.log(data.records);
+          if (statusCode == 200) {
+            // Filtering logic here
+            const existingDocumentTypes = data.records.map(
+              (record) => record.document_type
+            );
+
+            const updatedDocumentTypes = documentTypes.filter(
+              (dt) => !existingDocumentTypes.includes(dt.value)
+            );
+
+            setFilteredDocumentTypes(updatedDocumentTypes);
+          } else {
+            setFilteredDocumentTypes(documentTypes); // Reset if no data
+          }
+        });
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
   const handleUpload = async () => {
-    const base64 = await FileSystem.readAsStringAsync(file[0].uri, { encoding: FileSystem.EncodingType.Base64 });
+    const base64 = await FileSystem.readAsStringAsync(file[0].uri, {
+      encoding: FileSystem.EncodingType.Base64,
+    });
 
     fetch(`${BASE_URL}add-medical-record`, {
       method: "POST",
       headers: {
-        "Accept": "application/json",
+        Accept: "application/json",
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
@@ -77,18 +114,20 @@ export default function NewMedicalRecord({ navigation }) {
         file: {
           name: file[0].name,
           type: file[0].mimeType,
-          data: base64
+          data: base64,
         },
       }),
     })
-    .then(processResponse)
-    .then((res) => {
-      const { statusCode, data } = res;
-      console.log(data);
-    });
-
-    // navigation.goBack();
+      .then(processResponse)
+      .then((res) => {
+        const { statusCode, data } = res;
+        navigation.goBack();
+      });
   };
+
+  useEffect(() => {
+    getMedicalRecordPending();
+  }, []);
 
   return (
     <ScrollView style={styles.container}>
@@ -106,7 +145,7 @@ export default function NewMedicalRecord({ navigation }) {
       <SelectList
         style={styles.dropdown}
         setSelected={(val) => setDocumentType(val)}
-        data={documentTypes}
+        data={filteredDocumentTypes}
         save="value"
       />
 
