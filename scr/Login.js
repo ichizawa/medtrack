@@ -70,20 +70,10 @@ export default function Login({ navigation }) {
               styles.headerContainer, 
               isLargeScreen && styles.headerContainerLarge
             ]}>
-              <View style={[
-                styles.blobShape,
-                isLargeScreen && styles.blobShapeLarge
-              ]}>
-                <Text style={[
-                  styles.headerTitle,
-                  isLargeScreen && styles.headerTitleLarge
-                ]}>Welcome back,</Text>
-                <Text style={[
-                  styles.headerSubtitle,
-                  isLargeScreen && styles.headerSubtitleLarge
-                ]}>Log In!</Text>
-                {/* Removed the logoCircle component that contained the loading icon */}
-              </View>
+             <View>
+              <View></View>
+              <Text>Log in</Text>
+             </View>
             </View>
 
             <View style={[
