@@ -12,6 +12,7 @@ import {
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { AuthContext } from "../../context/AuthContext";
 import { BASE_URL, processResponse } from "../../config";
+import Pusher from 'pusher-js';
 
 const { width, height } = Dimensions.get("window");
 
@@ -24,7 +25,7 @@ export default function MedRecords({ navigation }) {
       fetch(`${BASE_URL}get-medical-records/${userInfo.id}`, {
         method: "GET",
         headers: {
-          "Accept": "application/json",
+          Accept: "application/json",
           "Content-Type": "application/json",
         },
       })
@@ -32,9 +33,9 @@ export default function MedRecords({ navigation }) {
         .then((res) => {
           const { statusCode, data } = res;
           // console.log(data);
-          if(statusCode == 200) {
+          if (statusCode == 200) {
             setData(data.records);
-          }else{
+          } else {
             setData([]);
           }
           // setData(data.records);
@@ -46,6 +47,15 @@ export default function MedRecords({ navigation }) {
 
   useEffect(() => {
     getRecords();
+
+    const pusher = new Pusher('a1d97d939eb60c02f4e0', {
+      cluster: 'ap1',
+    });
+    
+    const channel = pusher.subscribe('my-record');
+    channel.bind('upload-record', (data) => {
+      getRecords();
+    });
   }, []);
 
   return (
