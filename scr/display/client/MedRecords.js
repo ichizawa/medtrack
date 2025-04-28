@@ -106,7 +106,7 @@ export default function MedRecords({ navigation }) {
             <TouchableOpacity
               onPress={() => navigation.navigate("MedDetails")}
             >
-              <View key={i} style={styles.card}>
+              <View key={i + 1} style={styles.card}>
                 <View style={styles.cardTop}>
                   <Image
                     source={require("../../../assets/doc_type/x-ray.png")}
