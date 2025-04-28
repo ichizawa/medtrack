@@ -103,44 +103,48 @@ export default function MedRecords({ navigation }) {
         ) : (
           data.map((data, i) => (
             // console.log(data),
-            <View key={i} style={styles.card}>
-              <View style={styles.cardTop}>
-                <Image
-                  source={require("../../../assets/doc_type/x-ray.png")}
-                  style={styles.cardImage}
-                />
+            <TouchableOpacity
+              onPress={() => navigation.navigate("MedDetails")}
+            >
+              <View key={i} style={styles.card}>
+                <View style={styles.cardTop}>
+                  <Image
+                    source={require("../../../assets/doc_type/x-ray.png")}
+                    style={styles.cardImage}
+                  />
 
-                <View style={styles.cardInfo}>
-                  <Text style={styles.recordTitle} numberOfLines={1}>
-                    {data.document_type}
-                  </Text>
-                  <Text style={styles.recordDate}>{data.entry_date}</Text>
-                  <Text style={styles.recordFile} numberOfLines={1}>
-                    {data.file_name}
-                  </Text>
+                  <View style={styles.cardInfo}>
+                    <Text style={styles.recordTitle} numberOfLines={1}>
+                      {data.document_type}
+                    </Text>
+                    <Text style={styles.recordDate}>{data.entry_date}</Text>
+                    <Text style={styles.recordFile} numberOfLines={1}>
+                      {data.file_name}
+                    </Text>
+                  </View>
+
+                  <View
+                    style={[
+                      styles.statusTag,
+                      styles[data.status.replace(/\s/g, "").toLowerCase()],
+                    ]}
+                  >
+                    <Text style={styles.statusText}>{data.status}</Text>
+                  </View>
+
+                  <MaterialIcons
+                    name="more-vert"
+                    size={22}
+                    color="#444"
+                    style={{ marginLeft: 5 }}
+                  />
                 </View>
 
-                <View
-                  style={[
-                    styles.statusTag,
-                    styles[data.status.replace(/\s/g, "").toLowerCase()],
-                  ]}
-                >
-                  <Text style={styles.statusText}>{data.status}</Text>
-                </View>
-
-                <MaterialIcons
-                  name="more-vert"
-                  size={22}
-                  color="#444"
-                  style={{ marginLeft: 5 }}
-                />
+                <TouchableOpacity>
+                  <Text style={styles.viewMore}>View more</Text>
+                </TouchableOpacity>
               </View>
-
-              <TouchableOpacity>
-                <Text style={styles.viewMore}>View more</Text>
-              </TouchableOpacity>
-            </View>
+            </TouchableOpacity>
           ))
         )}
       </ScrollView>
