@@ -26,8 +26,7 @@ export default function NewMedicalRecord({ navigation }) {
   const [expirationDate, setExpirationDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [notes, setNotes] = useState("");
-  const [filteredDocumentTypes, setFilteredDocumentTypes] =
-    useState(documentTypes);
+  const [filteredDocumentTypes, setFilteredDocumentTypes] = useState(documentTypes);
 
   const documentTypes = [
     { key: 1, value: "Flu Vaccine" },
@@ -73,7 +72,7 @@ export default function NewMedicalRecord({ navigation }) {
         .then(processResponse)
         .then((res) => {
           const { statusCode, data } = res;
-          console.log(data.records);
+          // console.log(data.records);
           if (statusCode == 200) {
             // Filtering logic here
             const existingDocumentTypes = data.records.map(
