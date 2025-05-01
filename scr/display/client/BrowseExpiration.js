@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {
   StyleSheet,
   Text,
@@ -10,10 +10,39 @@ import {
   Image,
 } from "react-native";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
+import { AuthContext } from "../../context/AuthContext";
+import { BASE_URL, processResponse } from "../../config";
 
 const { width, height } = Dimensions.get("window");
 
 export default function BrowseExpiration({ navigation }) {
+  const [expiration, setExpiration] = useState([]);
+  const { userInfo } = useContext(AuthContext);
+
+  const getExpiration = () => {
+    try {
+      fetch(`${BASE_URL}get-expiration-record/${userInfo.id}`, {
+        method: "GET",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+      })
+        .then(processResponse)
+        .then((res) => {
+          const { statusCode, data } = res;
+          console.log(data);
+          setExpiration(data.records);
+        });
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    getExpiration();
+  }, []);
+
   return (
     <View style={styles.container}>
       {/* Row Wrapper for Back Button and Search Bar */}
@@ -50,51 +79,44 @@ export default function BrowseExpiration({ navigation }) {
 
       {/* ScrollView for Cards */}
       <ScrollView>
-        {/* First Blood Test Result Card */}
-        <View style={styles.card}>
-          <View style={styles.cardHeader}>
-            <View>
-              <Text style={styles.recordTitle}>Blood Test Result</Text>
-              <Text style={styles.hospitalName}>Davao Adventist Hospital</Text>
+        {/* Cards */}
+        {expiration.length > 0 ? (
+          expiration.map((item, i) => (
+            <View key={i} style={styles.card}>
+              <View style={styles.cardHeader}>
+                <View>
+                  <Text style={styles.recordTitle}>{item.document_name}</Text>
+                  <Text style={styles.hospitalName}>
+                    {item.document_type}
+                  </Text>
+                </View>
+                <View style={styles.dateContainer}>
+                  <Text style={styles.monthText}>
+                    {new Date(item.entry_date).toLocaleString('en-US', { month: 'short' })}
+                  </Text>
+                  <Text style={styles.dayText}>{new Date(item.entry_date).getDate()}</Text>
+                </View>
+              </View>
+              <Text style={styles.expiryText}>
+                {item.expires_in < 0 ? "Already expired" : `Expires in ${item.expires_in} day/s`}
+              </Text>
+              <View style={styles.cardActions}>
+                <TouchableOpacity style={styles.viewFileButton}>
+                  <Text style={styles.viewFileText}>View File</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.reuploadButton}>
+                  <Text style={styles.reuploadText}>Re-upload</Text>
+                </TouchableOpacity>
+              </View>
             </View>
-            <View style={styles.dateContainer}>
-              <Text style={styles.monthText}>April</Text>
-              <Text style={styles.dayText}>10</Text>
-            </View>
+          ))
+        ) : (
+          <View style={styles.emptyContainer}>
+            <Text style={styles.emptyText}>
+              No expiration records found
+            </Text>
           </View>
-          <Text style={styles.expiryText}>Expires in 2 days</Text>
-          <View style={styles.cardActions}>
-            <TouchableOpacity style={styles.viewFileButton}>
-              <Text style={styles.viewFileText}>View File</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.reuploadButton}>
-              <Text style={styles.reuploadText}>Re-upload</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        {/* Second Blood Test Result Card */}
-        <View style={styles.card}>
-          <View style={styles.cardHeader}>
-            <View>
-              <Text style={styles.recordTitle}>Blood Test Result</Text>
-              <Text style={styles.hospitalName}>Davao Adventist Hospital</Text>
-            </View>
-            <View style={styles.dateContainer}>
-              <Text style={styles.monthText}>April</Text>
-              <Text style={styles.dayText}>13</Text>
-            </View>
-          </View>
-          <Text style={styles.expiryTextOrange}>Expires in 5 days</Text>
-          <View style={styles.cardActions}>
-            <TouchableOpacity style={styles.viewFileButton}>
-              <Text style={styles.viewFileText}>View File</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.reuploadButton}>
-              <Text style={styles.reuploadText}>Re-upload</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
+        )}
       </ScrollView>
     </View>
   );
@@ -218,68 +240,16 @@ const styles = StyleSheet.create({
     color: "#666",
     fontSize: 14,
   },
-  viewFileText: {
-    color: "#007AFF",
-    fontSize: 14,
-    fontWeight: "500",
-  },
-  reuploadText: {
-    color: "#666",
-    fontSize: 14,
-  },
-
-  statusTag: {
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 10,
-    alignSelf: "flex-start",
-  },
-  expiringsoon: {
-    backgroundColor: "#E4965A",
-  },
-  expired: {
-    backgroundColor: "#FF0000",
-  },
-  completed: {
-    backgroundColor: "#66C173",
-  },
-  statusText: {
-    fontSize: 11,
-    fontWeight: "bold",
-    color: "#fff",
-  },
-  viewMore: {
-    marginTop: 5,
-    fontSize: 12,
-    color: "#007BFF",
-    textAlign: "center",
-    fontWeight: "bold",
-  },
-  addfile: {
-    position: "absolute",
-    bottom: 25,
-    right: 25,
-    backgroundColor: "#007BFF",
-    width: 55,
-    height: 55,
-    borderRadius: 30,
+  emptyContainer: {
+    flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    elevation: 5,
+    padding: 20,
   },
-  cardImage: {
-    width: 40,
-    height: 40,
-    resizeMode: "contain",
-    marginRight: 10,
-    borderRadius: 10,
-  },
-  cardProgress: {
-    height: 130,
-    width: 330,
-    backgroundColor: "#fff",
-    borderRadius: 15,
-    marginBottom: 15,
-    padding: 15,
+  emptyText: {
+    fontSize: 16,
+    color: "#666",
+    textAlign: "center",
   },
 });
+

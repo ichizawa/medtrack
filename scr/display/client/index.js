@@ -62,7 +62,8 @@ export default function Index() {
   const [expandedItem, setExpandedItem] = useState(null);
   const { width, height } = useWindowDimensions();
   const [dimensions, setDimensions] = useState({ width, height });
-
+  
+  const [records, setRecords] = useState(null); 
   const [counts, setCounts] = useState(null);
   // Handle screen rotation and size changes
   useEffect(() => {
@@ -84,38 +85,55 @@ export default function Index() {
     setExpandedItem(expandedItem === id ? null : id);
   };
 
-  const records = [
-    {
-      id: "1",
-      record_name: "Blood Test Result",
-      expires: "Apr 25, 2025",
-      entry: "Apr 25, 2025",
-      document_type: "Pneumococcal Vaccine",
-      status: "Pending",
-      color: "#E4965A",
-      note: "Hemoglobin: Normal\nWBC: Elevated\nPlatelet: Normal",
-      attachment: "file.pdf",
-      note: "Check not good",
-    },
-    {
-      id: "2",
-      record_name: "Hepatitis Vaccine",
-      expires: "Dec 10, 2025",
-      entry: "Dec 10, 2025",
-      document_type: "CBC Result",
-      status: "Complete",
-      color: "#66C173",
-      note: "Completed all 3 doses. No adverse reaction reported.",
-      attachment: "file.pdf",
-    },
-  ];
+  const fetchDashboardData = () => {
+    try {
+      fetch(`${BASE_URL}get-medical-records/${userInfo.id}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+      }).then(processResponse).then((res) => {
+        const { statusCode, data } = res;
+        setRecords(data.records);
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  // const records = [
+  //   {
+  //     id: "1",
+  //     record_name: "Blood Test Result",
+  //     expires: "Apr 25, 2025",
+  //     entry: "Apr 25, 2025",
+  //     document_type: "Pneumococcal Vaccine",
+  //     status: "Pending",
+  //     color: "#E4965A",
+  //     note: "Hemoglobin: Normal\nWBC: Elevated\nPlatelet: Normal",
+  //     attachment: "file.pdf",
+  //     note: "Check not good",
+  //   },
+  //   {
+  //     id: "2",
+  //     record_name: "Hepatitis Vaccine",
+  //     expires: "Dec 10, 2025",
+  //     entry: "Dec 10, 2025",
+  //     document_type: "CBC Result",
+  //     status: "Complete",
+  //     color: "#66C173",
+  //     note: "Completed all 3 doses. No adverse reaction reported.",
+  //     attachment: "file.pdf",
+  //   },
+  // ];
 
   const renderItem = ({ item }) => (
     <View style={styles.cardRecent}>
       <TouchableOpacity onPress={() => toggleExpand(item.id)}>
         <View style={styles.headerRow}>
           <View style={{ flexDirection: "row" }}>
-            <Text style={styles.title}>{item.record_name}</Text>
+            <Text style={styles.title}>{item.document_name}</Text>
             <Text
               style={{ color: item.color, fontWeight: "700", fontSize: 15 }}
             >
@@ -139,9 +157,9 @@ export default function Index() {
         <View style={styles.dropdown}>
           <Text style={styles.detailsLabel}>Details:</Text>
           <View style={{justifyContent: 'center', textAlign: 'center'}}>
-            <Text style={styles.details}>{item.entry}</Text>
-            <Text style={styles.details}>{item.expires}</Text>
-            <Text style={styles.details}>{item.attachment}</Text>
+            <Text style={styles.details}>{item.entry_date}</Text>
+            <Text style={styles.details}>{item.exp_date}</Text>
+            <Text style={styles.details}>{item.file_name}</Text>
             <Text style={styles.details}>{item.note}</Text>
           </View>
           <TouchableOpacity style={styles.button}>
@@ -177,6 +195,7 @@ export default function Index() {
   };
 
   useEffect(() => {
+    fetchDashboardData();
     getInfoCard();
   }, []);
 

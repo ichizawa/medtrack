@@ -42,7 +42,15 @@ export default function MedRecords({ navigation }) {
         .then((res) => {
           const { statusCode, data } = res;
           if (statusCode == 200) {
-            setData(data.records);
+            console.log(data.records);
+            setData(
+              data.records.filter(
+                (record) =>
+                  record.is_archived == 0 &&
+                  new Date().toISOString().split("T")[0] <=
+                    new Date(record.exp_date).toISOString().split("T")[0]
+              )
+            );
           } else {
             setData([]);
           }
@@ -52,20 +60,18 @@ export default function MedRecords({ navigation }) {
     }
   };
 
-  
-
   useEffect(() => {
     getRecords();
-    const pusher = new Pusher("a1d97d939eb60c02f4e0", { cluster: "ap1" });
-    const channel = pusher.subscribe("my-record");
-    channel.bind("upload-record", () => {
-      getRecords();
-    });
+    // const pusher = new Pusher("a1d97d939eb60c02f4e0", { cluster: "ap1" });
+    // const channel = pusher.subscribe("my-record");
+    // channel.bind("upload-record", () => {
+    //   getRecords();
+    // });
 
-    return () => {
-      channel.unbind_all();
-      channel.unsubscribe();
-    };
+    // return () => {
+    //   channel.unbind_all();
+    //   channel.unsubscribe();
+    // };
   }, []);
 
   const filteredData =
@@ -162,7 +168,7 @@ export default function MedRecords({ navigation }) {
               filteredData.map((record, i) => (
                 <TouchableOpacity
                   key={i}
-                  onPress={() => navigation.navigate("MedDetails")}
+                  onPress={() => navigation.navigate("MedDetails", { record })}
                 >
                   <View style={styles.card}>
                     <View style={styles.cardTop}>

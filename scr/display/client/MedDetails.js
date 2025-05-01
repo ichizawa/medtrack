@@ -11,11 +11,13 @@ import {
   ScrollView,
 } from "react-native";
 
-export default function MedDetails({ navigation }) {
+export default function MedDetails({ route, navigation }) {
+  const { record } = route.params;
   const [dimensions, setDimensions] = useState({
     window_width: Dimensions.get("window").width,
     window_height: Dimensions.get("window").height,
   });
+  
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="light-content" backgroundColor="#00806A" />
@@ -43,22 +45,22 @@ export default function MedDetails({ navigation }) {
               <View style={styles.progressBar}>
                 <View style={styles.progressFilled}></View>
               </View>
-              <Text style={styles.statusText}>Completed</Text>
+              <Text style={styles.statusText}>{record.status ? "Completed" : "Pending"}</Text>
             </View>
 
             {/* Medical Information */}
             <View style={styles.medicalInfoContainer}>
-              <Text style={styles.title}>Annual Physical Exam</Text>
-              <Text style={styles.subtitle}>Medical Certificate</Text>
+              <Text style={styles.title}>{record.document_name}</Text>
+              <Text style={styles.subtitle}>{record.document_type}</Text>
 
               <View style={styles.dateContainer}>
                 <View style={styles.dateItem}>
                   <Text style={styles.dateLabel}>Entry Date:</Text>
-                  <Text style={styles.dateValue}>January 11, 2025</Text>
+                  <Text style={styles.dateValue}>{record.entry_date}</Text>
                 </View>
                 <View style={styles.dateItem}>
                   <Text style={styles.dateLabel}>Expiry Date:</Text>
-                  <Text style={styles.dateValue}>June 3, 2025</Text>
+                  <Text style={styles.dateValue}>{record.exp_date}</Text>
                 </View>
               </View>
 
@@ -74,7 +76,9 @@ export default function MedDetails({ navigation }) {
               {/* Remarks */}
               <View style={styles.sectionContainer}>
                 <Text style={styles.sectionTitle}>Remarks</Text>
-                <View style={styles.remarksContainer}></View>
+                <View style={styles.remarksContainer}>
+                  <Text>{record.note}</Text>
+                </View>
               </View>
             </View>
           </View>
