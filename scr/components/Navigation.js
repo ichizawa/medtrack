@@ -7,6 +7,7 @@ import Profile from "../display/client/profile";
 import BrowseExpiration from "../display/client/BrowseExpiration";
 import NewMedicalRecord from "../display/client/NewMedicalRecord";
 import MedDetails from "../display/client/MedDetails";
+import EditProfile from "../display/client/EditProfile";
 import Login from "../Login";
 import Register from "../Register";
 import { AuthContext } from "../context/AuthContext";
@@ -33,6 +34,7 @@ export default function Navigation() {
           <Stack.Screen name="BrowseExpiration" component={BrowseExpiration} options={{headerShown: false}} />
           <Stack.Screen name="NewMedicalRecord" component={NewMedicalRecord} options={{headerShown: false}} />
           <Stack.Screen name="MedDetails" component={MedDetails} options={{headerShown: false}} />
+          <Stack.Screen name="EditProfile" component={EditProfile} options={{headerShown: false}} />
         </>
       )}
     </Stack.Navigator>

@@ -1,94 +1,158 @@
-import { StyleSheet, Text, View, ScrollView, TouchableOpacity, TextInput } from 'react-native';
-import React, { useState } from 'react';
-import { Ionicons, MaterialIcons } from '@expo/vector-icons';
+import {
+  StyleSheet,
+  Text,
+  View,
+  ScrollView,
+  TouchableOpacity,
+  TextInput,
+} from "react-native";
+import React, { useContext, useEffect, useState } from "react";
+import { Ionicons } from "@expo/vector-icons";
+import { AuthContext } from "../../context/AuthContext";
+import { BASE_URL, processResponse } from "../../config";
 
-export default function Notifications({navigation}) {
-  // Example data for notifications
-  const notifications = [
-    { id: 1, message: 'Your Hepatitis B Vaccine is expiring soon.', status: 'expiring soon' },
-    { id: 2, message: 'Your COVID-19 Test results are available.', status: 'completed' },
-    { id: 3, message: 'Your Annual Checkup has been completed.', status: 'completed' },
-    { id: 4, message: 'Your Flu Vaccine is expiring soon.', status: 'expiring soon' },
-    { id: 5, message: 'Your Cholesterol Test results are available.', status: 'completed' },
-    { id: 6, message: 'Your Blood Pressure Monitoring is scheduled for tomorrow.', status: 'completed' },
-    { id: 7, message: 'Your Malaria Test results are available.', status: 'completed' },
-    { id: 8, message: 'Your HIV Test is expired.', status: 'expired' },
-    { id: 9, message: 'Your Diabetes Test results are available.', status: 'completed' },
-    { id: 10, message: 'Your X-Ray Result is expired.', status: 'expired' },
-  ];
+export default function Notifications() {
+  const { userInfo } = useContext(AuthContext);
+  const [data, setData] = useState([]);
+  const [notifications, setNotifications] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
 
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedStatus, setSelectedStatus] = useState('all');
+  
 
-  // Filter notifications based on search query and status
-  const filteredNotifications = notifications.filter((notification) => {
-    const matchesQuery = notification.message.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesStatus = selectedStatus === 'all' || notification.status === selectedStatus;
-    return matchesQuery && matchesStatus;
-  });
+  const getRecords = () => {
+    try {
+      fetch(`${BASE_URL}get-medical-records/${userInfo.id}`, {
+        method: "GET",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+      })
+        .then(processResponse)
+        .then((res) => {
+          const { statusCode, data } = res;
+          if (statusCode === 200) {
+            setData(data.records);
+
+            const now = new Date();
+            const generatedNotifications = data.records.map((record) => {
+              const expDate = new Date(record.exp_date + "T12:00:00");
+              const entryDate = new Date(record.entry_date + "T12:00:00");
+              const daysUntilExp = (expDate - now) / (1000 * 60 * 60 * 24);
+
+              let status = "";
+              let message = "";
+
+              if (daysUntilExp < 0) {
+                status = "expired";
+                message = `The record ${record.document_type} expired on ${expDate.toLocaleDateString()}.`;
+              } else if (daysUntilExp <= 7) {
+                status = "expiring soon";
+                message = `The record ${record.document_type} will expire soon (on ${expDate.toLocaleDateString()}).`;
+              } else {
+                status = "pending";
+                message = `The record ${record.document_type} is valid until ${expDate.toLocaleDateString()}.`;
+              }
+
+              return {
+                id: record.id,
+                status,
+                message,
+                exp_date: record.exp_date,
+                timestamp: now.toLocaleString(),
+              };
+            });
+
+            setNotifications(generatedNotifications);
+          } else {
+            setData([]);
+            setNotifications([]);
+          }
+        });
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
+  useEffect(() => {
+    getRecords();
+  }, []);
+
+  const filteredNotifications = notifications.filter((n) =>
+    n.message.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>Notifications</Text>
-
-      {/* Search Bar */}
-      <TextInput
-        style={styles.searchBar}
-        placeholder="Search notifications..."
-        value={searchQuery}
-        onChangeText={(text) => setSearchQuery(text)}
-      />
-
-      {/* Filter by status */}
-      <View style={styles.filterContainer}>
-        <TouchableOpacity
-          style={[styles.filterButton, selectedStatus === 'all' && styles.selectedFilter]}
-          onPress={() => setSelectedStatus('all')}
-        >
-          <Text style={[styles.filterText, selectedStatus === 'all' && styles.selectedFilterText]}>All</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.filterButton, selectedStatus === 'expiring soon' && styles.selectedFilter]}
-          onPress={() => setSelectedStatus('expiring soon')}
-        >
-          <Text style={[styles.filterText, selectedStatus === 'expiring soon' && styles.selectedFilterText]}>Expiring Soon</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.filterButton, selectedStatus === 'completed' && styles.selectedFilter]}
-          onPress={() => setSelectedStatus('completed')}
-        >
-          <Text style={[styles.filterText, selectedStatus === 'completed' && styles.selectedFilterText]}>Completed</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.filterButton, selectedStatus === 'expired' && styles.selectedFilter]}
-          onPress={() => setSelectedStatus('expired')}
-        >
-          <Text style={[styles.filterText, selectedStatus === 'expired' && styles.selectedFilterText]}>Expired</Text>
-        </TouchableOpacity>
+      <View style={styles.headerRow}>
+        <Text style={styles.headerText}>Notifications</Text>
       </View>
 
-      <ScrollView style={styles.notificationList} showsVerticalScrollIndicator={false}>
-        {filteredNotifications.map((notification) => (
-          <View key={notification.id} style={[styles.notificationCard, styles[notification.status]]}>
-            <View style={styles.notificationContent}>
-              {/* Icon based on status */}
-              <Ionicons
-                name={notification.status === 'expiring soon' ? 'alert-circle' : notification.status === 'completed' ? 'checkmark-circle' : 'close-circle'}
-                size={30}
-                color={notification.status === 'expiring soon' ? '#ff9800' : notification.status === 'completed' ? '#4caf50' : '#f44336'}
-                style={styles.notificationIcon}
-              />
-              <View style={styles.notificationTextContainer}>
-                <Text style={styles.notificationMessage}>{notification.message}</Text>
-                <Text style={styles.timestamp}>Just now</Text>
+      <View style={styles.searchBarContainer}>
+        <Ionicons
+          name="search"
+          size={20}
+          color="#999"
+          style={styles.searchIcon}
+        />
+        <TextInput
+          style={styles.searchBar}
+          placeholder="Search notifications..."
+          value={searchQuery}
+          onChangeText={(text) => setSearchQuery(text)}
+        />
+      </View>
+
+      <ScrollView
+        style={styles.notificationList}
+        showsVerticalScrollIndicator={false}
+      >
+        {filteredNotifications.length === 0 ? (
+          <View style={{ padding: 20, alignItems: "center" }}>
+            <Text style={{ color: "#888", fontSize: 16 }}>
+              No notifications available
+            </Text>
+          </View>
+        ) : (
+          filteredNotifications.map((notification) => (
+            <View
+              key={notification.id}
+              style={[
+                styles.notificationCard,
+                styles[notification.status.replace(" ", "")],
+              ]}
+            >
+              <View style={styles.notificationContent}>
+                <Ionicons
+                  name={
+                    notification.status === "expiring soon"
+                      ? "alert-circle"
+                      : notification.status === "expired"
+                      ? "close-circle"
+                      : "time"
+                  }
+                  size={30}
+                  color={
+                    notification.status === "expiring soon"
+                      ? "#ff9800"
+                      : notification.status === "expired"
+                      ? "#f44336"
+                      : "#2196f3"
+                  }
+                />
+
+                <View style={styles.notificationTextContainer}>
+                  <Text style={styles.notificationMessage}>
+                    {notification.message}
+                  </Text>
+                  <Text style={styles.timestamp}>
+                    {notification.timestamp}
+                  </Text>
+                </View>
               </View>
             </View>
-            <TouchableOpacity style={styles.viewMoreButton}>
-              <Text style={styles.viewMoreText}>View Details</Text>
-              <MaterialIcons name="arrow-forward" size={18} color="#007BFF" />
-            </TouchableOpacity>
-          </View>
-        ))}
+          ))
+        )}
       </ScrollView>
     </View>
   );
@@ -97,104 +161,64 @@ export default function Notifications({navigation}) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F9F9F9',
-    paddingHorizontal: 20,
-    paddingTop: 30,
-    paddingBottom: 20,
+    padding: 20,
+    backgroundColor: "#fff",
   },
-  header: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#333',
+  headerRow: {
+    marginBottom: 10,
+  },
+  headerText: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "#01466c",
+  },
+  searchBarContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#f2f2f2",
+    borderRadius: 10,
+    paddingHorizontal: 10,
     marginBottom: 15,
   },
+  searchIcon: {
+    marginRight: 8,
+  },
   searchBar: {
-    height: 50,
-    backgroundColor: '#fff',
-    borderRadius: 25,
-    paddingHorizontal: 15,
-    fontSize: 16,
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    shadowOffset: { width: 0, height: 2 },
-    marginBottom: 20,
-  },
-  filterContainer: {
-    flexDirection: 'row',
-    marginBottom: 20,
-    justifyContent: 'space-between',
-  },
-  filterButton: {
-    paddingVertical: 10,
-    paddingHorizontal: 15,
-    backgroundColor: '#f0f0f0',
-    borderRadius: 20,
-    alignItems: 'center',
-  },
-  filterText: {
-    fontSize: 14,
-    color: '#555',
-  },
-  selectedFilter: {
-    backgroundColor: '#007BFF',
-  },
-  selectedFilterText: {
-    color: '#fff',
+    flex: 1,
+    height: 40,
   },
   notificationList: {
     flex: 1,
   },
   notificationCard: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    marginBottom: 15,
-    padding: 20,
-    flexDirection: 'row',
-    alignItems: 'center',
-   
+    padding: 15,
+    borderRadius: 10,
+    marginBottom: 12,
   },
   notificationContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-  },
-  notificationIcon: {
-    marginRight: 15,
+    flexDirection: "row",
+    alignItems: "center",
   },
   notificationTextContainer: {
+    marginLeft: 12,
     flex: 1,
   },
   notificationMessage: {
     fontSize: 16,
-    fontWeight: '500',
-    color: '#333',
+    color: "#333",
     marginBottom: 5,
   },
   timestamp: {
     fontSize: 12,
-    color: '#777',
-  },
-  viewMoreButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  viewMoreText: {
-    fontSize: 14,
-    color: '#007BFF',
-    marginRight: 5,
-    fontWeight: '600',
+    color: "#888",
   },
   expiringsoon: {
-    borderLeftWidth: 6,
-    borderLeftColor: '#ff9800',
-  },
-  completed: {
-    borderLeftWidth: 6,
-    borderLeftColor: '#4caf50',
+    backgroundColor: "#fff3e0",
   },
   expired: {
-    borderLeftWidth: 6,
-    borderLeftColor: '#f44336',
+    backgroundColor: "#ffebee",
+  },
+  pending: {
+    backgroundColor: "#e3f2fd",
   },
 });

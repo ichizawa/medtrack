@@ -18,7 +18,7 @@ export default function MedDetails({ navigation }) {
   });
   return (
     <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="light-content" backgroundColor="#0288D1" />
+      <StatusBar barStyle="light-content" backgroundColor="#00806A" />
       <View style={styles.container}>
         <View style={styles.header}>
           <TouchableOpacity onPress={() => navigation.goBack()}>
@@ -38,127 +38,45 @@ export default function MedDetails({ navigation }) {
 
         <ScrollView>
           <View style={styles.cardBody}>
+            {/* Status Bar */}
+            <View style={styles.statusContainer}>
+              <View style={styles.progressBar}>
+                <View style={styles.progressFilled}></View>
+              </View>
+              <Text style={styles.statusText}>Completed</Text>
+            </View>
+
             {/* Medical Information */}
-            <View
-              style={{
-                flexDirection: "row",
-                marginTop: 10,
-                alignItems: "center",
-                justifyContent: "space-between",
-              }}
-            >
-              {/* Left side*/}
-              <View style={{ flexDirection: "row", alignItems: "center" }}>
-                <Text
-                  style={{ marginLeft: 10, fontSize: 20, fontWeight: "bold" }}
-                >
-                  Annual Physical Exam
-                </Text>
-              </View>
-            </View>
-            <View
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                justifyContent: "space-between",
-              }}
-            >
-              {/* Left side*/}
-              <View style={{ flexDirection: "row", alignItems: "center" }}>
-                <Text
-                  style={{
-                    marginLeft: 10,
-                    fontSize: 15,
-                    fontStyle: "italic",
-                    color: "#0288D1",
-                  }}
-                >
-                  Medical Certificate
-                </Text>
-              </View>
-            </View>
-            <View
-              style={{
-                flexDirection: "row",
-                marginTop: 10,
-                alignItems: "center",
-                justifyContent: "space-between",
-              }}
-            >
-              {/* Left side*/}
-              <View style={{ flexDirection: "row", alignItems: "center" }}>
-                <Image
-                  source={require("../../../assets/calendar_entry.png")}
-                  style={{ width: 17, height: 17 }}
-                  resizeMode="contain"
-                />
-                <Text style={{ marginLeft: 10, fontSize: 16 }}>
-                  Mar 11, 2025
-                </Text>
+            <View style={styles.medicalInfoContainer}>
+              <Text style={styles.title}>Annual Physical Exam</Text>
+              <Text style={styles.subtitle}>Medical Certificate</Text>
+
+              <View style={styles.dateContainer}>
+                <View style={styles.dateItem}>
+                  <Text style={styles.dateLabel}>Entry Date:</Text>
+                  <Text style={styles.dateValue}>January 11, 2025</Text>
+                </View>
+                <View style={styles.dateItem}>
+                  <Text style={styles.dateLabel}>Expiry Date:</Text>
+                  <Text style={styles.dateValue}>June 3, 2025</Text>
+                </View>
               </View>
 
-              {/* Right side */}
-              <View style={{ flexDirection: "row", alignItems: "center" }}>
-                <Image
-                  source={require("../../../assets/expiry.png")}
-                  style={{ width: 17, height: 17 }}
-                  resizeMode="contain"
-                />
-                <Text style={{ marginLeft: 10, fontSize: 16 }}>
-                  Sept 27, 2025
-                </Text>
+              {/* Attachments */}
+              <View style={styles.sectionContainer}>
+                <Text style={styles.sectionTitle}>Attachments</Text>
+                <View style={styles.attachmentsContainer}>
+                  <View style={styles.attachmentItem}></View>
+                  <View style={styles.attachmentItem}></View>
+                </View>
+              </View>
+
+              {/* Remarks */}
+              <View style={styles.sectionContainer}>
+                <Text style={styles.sectionTitle}>Remarks</Text>
+                <View style={styles.remarksContainer}></View>
               </View>
             </View>
-            <View
-              style={{
-                flexDirection: "row",
-                marginTop: 10,
-                alignItems: "center",
-                justifyContent: "space-between",
-              }}
-            >
-              {/* Left side*/}
-              <View style={{ flexDirection: "row", alignItems: "center" }}>
-                <Image
-                  source={require("../../../assets/clinic.png")}
-                  style={{ width: 17, height: 17 }}
-                  resizeMode="contain"
-                />
-                <Text style={{ marginLeft: 10, fontSize: 18 }}>
-                  Dr. James Smith
-                </Text>
-              </View>
-            </View>
-            <View
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                justifyContent: "space-between",
-              }}
-            >
-              {/* Left side*/}
-              <View style={{ flexDirection: "row", alignItems: "center" }}>
-                
-                <Text style={{ marginLeft: 29, fontSize: 15, color:"#cfcfcf" }}>
-                  Davao Doctors Hospital
-                </Text>
-              </View>
-            </View>
-            {/* Notes */}
-            <Text
-              style={{
-                fontSize: 15,
-                fontWeight: "bold",
-                alignItems: "center",
-                marginTop: 18,
-              }}
-            >
-              Notes
-            </Text>
-            <View style={styles.notes}>
-              <Text>Notes here...</Text>
-            </View>
-            {/* Attachments */}
           </View>
         </ScrollView>
       </View>
@@ -202,14 +120,81 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 15,
   },
-  notes: {
-    flex: 1,
-    width: 300,
-    height: 200,
-    borderColor: "#0288D1",
-    borderWidth: 1,
-    margin: 5,
-    borderRadius: 5,
+  statusContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "flex-end",
+    marginBottom: 10,
+  },
+  progressBar: {
+    height: 8,
+    width: 150,
+    backgroundColor: "#e0e0e0",
+    borderRadius: 4,
+    marginRight: 10,
+  },
+  progressFilled: {
+    height: "100%",
+    width: "100%",
+    backgroundColor: "#0288D1",
+    borderRadius: 4,
+  },
+  statusText: {
+    color: "#0288D1",
+    fontWeight: "bold",
+  },
+  medicalInfoContainer: {
     padding: 5,
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: "bold",
+    marginBottom: 5,
+  },
+  subtitle: {
+    fontSize: 14,
+    color: "#0288D1",
+    fontStyle: "italic",
+    marginBottom: 15,
+  },
+  dateContainer: {
+    marginVertical: 15,
+  },
+  dateItem: {
+    flexDirection: "row",
+    marginBottom: 8,
+  },
+  dateLabel: {
+    width: 80,
+    color: "#757575",
+  },
+  dateValue: {
+    fontWeight: "500",
+    color: "#0288D1",
+  },
+  sectionContainer: {
+    marginTop: 20,
+  },
+  sectionTitle: {
+    fontSize: 14,
+    color: "#757575",
+    marginBottom: 10,
+  },
+  attachmentsContainer: {
+    flexDirection: "row",
+  },
+  attachmentItem: {
+    width: 80,
+    height: 80,
+    backgroundColor: "#e0e0e0",
+    marginRight: 10,
+    borderRadius: 4,
+  },
+  remarksContainer: {
+    height: 100,
+    borderWidth: 1,
+    borderColor: "#e0e0e0",
+    borderRadius: 4,
+    padding: 10,
   },
 });

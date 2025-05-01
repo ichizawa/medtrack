@@ -41,17 +41,20 @@ export default function Register({ navigation }) {
       <SafeAreaView>
         <View style={styles.title_section}>
           <Text style={styles.greeting_title_text}>
-            Create <Text style={{ color: "#00806A" }}>Account</Text>
+            Create <Text style={{ color: "#0288D1" }}>Account</Text>
           </Text>
         </View>
 
         <View style={styles.form_section}>
+          <View>
+            <Text style={{ fontSize: 15, fontWeight: '500' }}>Student Information</Text>
+          </View>
           <View style={styles.inputContainer}>
             <FontAwesome name="user" size={20} style={styles.icon} />
             <TextInput
               style={[
                 styles.text_input,
-                { borderColor: isFnameFocussed ? "#00806A" : "#ECE2E2" },
+                { borderColor: isFnameFocussed ? "#0288D1" : "#ECE2E2" },
               ]}
               onFocus={() => setFnameFocused(true)}
               onBlur={() => setFnameFocused(false)}
@@ -65,7 +68,7 @@ export default function Register({ navigation }) {
             <TextInput
               style={[
                 styles.text_input,
-                { borderColor: isFnameFocussed ? "#00806A" : "#ECE2E2" },
+                { borderColor: isFnameFocussed ? "#0288D1" : "#ECE2E2" },
               ]}
               onFocus={() => setFnameFocused(true)}
               onBlur={() => setFnameFocused(false)}
@@ -79,7 +82,7 @@ export default function Register({ navigation }) {
             <TextInput
               style={[
                 styles.text_input,
-                { borderColor: isLnameFocused ? "#00806A" : "#ECE2E2" },
+                { borderColor: isLnameFocused ? "#0288D1" : "#ECE2E2" },
               ]}
               onFocus={() => setLnameFocused(true)}
               onBlur={() => setLnameFocused(false)}
@@ -93,7 +96,7 @@ export default function Register({ navigation }) {
             <TextInput
               style={[
                 styles.text_input,
-                { borderColor: isEmailFocused ? "#00806A" : "#ECE2E2" },
+                { borderColor: isEmailFocused ? "#0288D1" : "#ECE2E2" },
               ]}
               onFocus={() => setEmailFocused(true)}
               onBlur={() => setEmailFocused(false)}
@@ -101,13 +104,29 @@ export default function Register({ navigation }) {
               onChangeText={(text) => setFormData({ ...form, phone: text })}
             />
           </View>
+          <View style={styles.inputContainer}>
+            <FontAwesome name="envelope" size={16} style={styles.icon} />
+            <TextInput
+              style={[
+                styles.text_input,
+                { borderColor: isEmailFocused ? "#0288D1" : "#ECE2E2" },
+              ]}
+              onFocus={() => setEmailFocused(true)}
+              onBlur={() => setEmailFocused(false)}
+              placeholder="Email"
+              onChangeText={(text) => setFormData({ ...form, email: text })}
+            />
+          </View>
+          <View>
+            <Text style={{ fontSize: 15, fontWeight: '500' }}>Account</Text>
+          </View>
 
           <View style={styles.inputContainer}>
             <FontAwesome name="user" size={20} style={styles.icon} />
             <TextInput
               style={[
                 styles.text_input,
-                { borderColor: isUsernameFocused ? "#00806A" : "#ECE2E2" },
+                { borderColor: isUsernameFocused ? "#0288D1" : "#ECE2E2" },
               ]}
               onFocus={() => setUsernameFocused(true)}
               onBlur={() => setUsernameFocused(false)}
@@ -117,25 +136,11 @@ export default function Register({ navigation }) {
           </View>
 
           <View style={styles.inputContainer}>
-            <FontAwesome name="envelope" size={16} style={styles.icon} />
-            <TextInput
-              style={[
-                styles.text_input,
-                { borderColor: isEmailFocused ? "#00806A" : "#ECE2E2" },
-              ]}
-              onFocus={() => setEmailFocused(true)}
-              onBlur={() => setEmailFocused(false)}
-              placeholder="Email"
-              onChangeText={(text) => setFormData({ ...form, email: text })}
-            />
-          </View>
-
-          <View style={styles.inputContainer}>
             <FontAwesome name="lock" size={20} style={styles.icon} />
             <TextInput
               style={[
                 styles.text_input,
-                { borderColor: isPasswordFocused ? "#00806A" : "#ECE2E2" },
+                { borderColor: isPasswordFocused ? "#0288D1" : "#ECE2E2" },
               ]}
               secureTextEntry={true}
               onFocus={() => setPasswordFocused(true)}
@@ -155,7 +160,7 @@ export default function Register({ navigation }) {
             <TextInput
               style={[
                 styles.text_input,
-                { borderColor: isConfirmPassFocused ? "#00806A" : "#ECE2E2" },
+                { borderColor: isConfirmPassFocused ? "#0288D1" : "#ECE2E2" },
               ]}
               secureTextEntry={true}
               onFocus={() => setConfirmPassFocused(true)}
@@ -177,12 +182,12 @@ export default function Register({ navigation }) {
               // navigation.navigate("Login");
             }}
           >
-            <Text style={styles.auth_button_text}>REGISTER</Text>
+            <Text style={styles.auth_button_text}>Sign Up</Text>
           </TouchableOpacity>
         </View>
 
         <View style={styles.bottom_section}>
-          <Text style={{ fontSize: 14, fontWeight: "400", color: "#808080" }}>
+          <Text style={{ fontSize: 12, fontWeight: "400", color: "#808080" }}>
             Already have an account?{" "}
           </Text>
           <TouchableOpacity
@@ -216,16 +221,16 @@ const styles = StyleSheet.create({
   },
   icon: {
     marginRight: 10,
-    color: "#00806A",
+    color: "#0288D1",
   },
   title_section: {
-    height: window_height * 0.2,
+    height: window_height * 0.1,
     justifyContent: "flex-end",
     padding: 15,
     width: "100%",
   },
   greeting_title_text: {
-    fontSize: 38,
+    fontSize: 30,
     fontWeight: "bold",
     textAlign: "center",
   },
@@ -235,24 +240,23 @@ const styles = StyleSheet.create({
     padding: 10,
   },
   button_section: {
-    padding: 15,
-    paddingTop: "5%",
+    paddingHorizontal: 15,
   },
   auth_button: {
     height: 50,
-    backgroundColor: "#00806A",
-    borderRadius: 10,
+    backgroundColor: "#0288D1",
+    borderRadius: 5,
     width: "100%",
     alignItems: "center",
     justifyContent: "center",
   },
   register_button_text: {
-    color: "#00806A",
-    fontSize: 14,
+    color: "#0288D1",
+    fontSize: 13,
     fontWeight: "bold",
   },
   auth_button_text: {
-    fontSize: 18,
+    fontSize: 15,
     fontWeight: "bold",
     color: "#ffffff",
   },
@@ -260,7 +264,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    paddingTop: 20,
-    paddingBottom: 20,
+    paddingTop: 10,
   },
 });

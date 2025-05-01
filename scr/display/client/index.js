@@ -21,11 +21,14 @@ import {
   MaterialIcons,
   Entypo,
 } from "@expo/vector-icons";
-import { AuthContext } from '../../context/AuthContext'
+import { AuthContext } from "../../context/AuthContext";
 import { BASE_URL, processResponse } from "../../config";
 
 // Enable LayoutAnimation for Android
-if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
+if (
+  Platform.OS === "android" &&
+  UIManager.setLayoutAnimationEnabledExperimental
+) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
@@ -33,7 +36,7 @@ const upcomingExpirations = [
   {
     name: "Blood Test Result",
     location: "Davao Adventist Hospital",
-    date: "Thurs, Apr 10, 2025",
+    date: "Apr 10, 2025",
     time: "10:00 AM",
     icon: require("../../../assets/doc_type/blood-test.png"),
   },
@@ -54,12 +57,12 @@ const upcomingExpirations = [
 ];
 
 export default function Index() {
-  const {userInfo} = useContext(AuthContext);
+  const { userInfo } = useContext(AuthContext);
   const navigation = useNavigation();
   const [expandedItem, setExpandedItem] = useState(null);
   const { width, height } = useWindowDimensions();
   const [dimensions, setDimensions] = useState({ width, height });
-  
+
   const [counts, setCounts] = useState(null);
   // Handle screen rotation and size changes
   useEffect(() => {
@@ -69,42 +72,57 @@ export default function Index() {
         height: window.height,
       });
     });
-    
+
     return () => subscription?.remove();
   }, []);
-  
+
   const isTablet = dimensions.width >= 768;
   const cardWidth = isTablet ? dimensions.width * 0.4 : dimensions.width * 0.9;
-  
+
   const toggleExpand = (id) => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     setExpandedItem(expandedItem === id ? null : id);
   };
-  
+
   const records = [
     {
       id: "1",
-      title: "Blood Test Result",
+      record_name: "Blood Test Result",
       expires: "Apr 25, 2025",
+      entry: "Apr 25, 2025",
+      document_type: "Pneumococcal Vaccine",
       status: "Pending",
       color: "#E4965A",
-      details: "Hemoglobin: Normal\nWBC: Elevated\nPlatelet: Normal",
+      note: "Hemoglobin: Normal\nWBC: Elevated\nPlatelet: Normal",
+      attachment: "file.pdf",
+      note: "Check not good",
     },
     {
       id: "2",
-      title: "Hepatitis Vaccine",
+      record_name: "Hepatitis Vaccine",
       expires: "Dec 10, 2025",
+      entry: "Dec 10, 2025",
+      document_type: "CBC Result",
       status: "Complete",
       color: "#66C173",
-      details: "Completed all 3 doses. No adverse reaction reported.",
+      note: "Completed all 3 doses. No adverse reaction reported.",
+      attachment: "file.pdf",
     },
   ];
 
   const renderItem = ({ item }) => (
     <View style={styles.cardRecent}>
-      <View style={styles.headerRow}>
-        <Text style={styles.title}>{item.title}</Text>
-        <TouchableOpacity onPress={() => toggleExpand(item.id)}>
+      <TouchableOpacity onPress={() => toggleExpand(item.id)}>
+        <View style={styles.headerRow}>
+          <View style={{ flexDirection: "row" }}>
+            <Text style={styles.title}>{item.record_name}</Text>
+            <Text
+              style={{ color: item.color, fontWeight: "700", fontSize: 15 }}
+            >
+              {item.status}
+            </Text>
+          </View>
+
           <Image
             source={
               expandedItem === item.id
@@ -113,18 +131,19 @@ export default function Index() {
             }
             style={styles.iconArrow}
           />
-        </TouchableOpacity>
-      </View>
-      <Text>Expires: {item.expires}</Text>
-
-      <Text style={{ color: item.color, fontWeight: "700", fontSize: 15 }}>
-        {item.status}
-      </Text>
+        </View>
+        <Text>{item.document_type}</Text>
+      </TouchableOpacity>
 
       {expandedItem === item.id && (
         <View style={styles.dropdown}>
           <Text style={styles.detailsLabel}>Details:</Text>
-          <Text style={styles.details}>{item.details}</Text>
+          <View style={{justifyContent: 'center', textAlign: 'center'}}>
+            <Text style={styles.details}>{item.entry}</Text>
+            <Text style={styles.details}>{item.expires}</Text>
+            <Text style={styles.details}>{item.attachment}</Text>
+            <Text style={styles.details}>{item.note}</Text>
+          </View>
           <TouchableOpacity style={styles.button}>
             <Text style={styles.buttonText}>View File</Text>
           </TouchableOpacity>
@@ -143,19 +162,19 @@ export default function Index() {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
-        'Accept': 'application/json'
+        Accept: "application/json",
       },
     })
-    .then(processResponse)
-    .then((res) => {
-      const { statusCode, data } = res;
-      if(statusCode == 200){
-        setCounts(data.data);
-      }else{
-        setCounts(null);
-      }
-    });
-  }
+      .then(processResponse)
+      .then((res) => {
+        const { statusCode, data } = res;
+        if (statusCode == 200) {
+          setCounts(data.data);
+        } else {
+          setCounts(null);
+        }
+      });
+  };
 
   useEffect(() => {
     getInfoCard();
@@ -163,7 +182,7 @@ export default function Index() {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <ScrollView 
+      <ScrollView
         style={styles.container}
         contentContainerStyle={styles.contentContainer}
       >
@@ -172,22 +191,10 @@ export default function Index() {
             <Text style={styles.greeting}>Hello,</Text>
             <Text style={styles.headerTitle}>{userInfo.first_name}!</Text>
           </View>
-          <View style={styles.rightIcons}>
-            <Ionicons
-              name="notifications-outline"
-              size={24}
-              color="#0f172a"
-              style={styles.icon}
-            />
-            {/* <Image
-              source={require('../../../assets/blood-test.png')}
-              style={styles.profileImage}
-            /> */}
-          </View>
         </View>
 
         <View style={[styles.summaryCard, { width: cardWidth }]}>
-          <View style={[styles.cardPlaceholder, { width: '100%' }]}>
+          <View style={[styles.cardPlaceholder, { width: "100%" }]}>
             <View style={styles.row}>
               <View style={styles.cardItem}>
                 <View style={styles.iconCompletedBg}>
@@ -196,7 +203,9 @@ export default function Index() {
                     style={styles.iconSumCard}
                   />
                 </View>
-                <Text style={styles.completedNumber}>{counts?.completed ?? 0}</Text>
+                <Text style={styles.completedNumber}>
+                  {counts?.completed ?? 0}
+                </Text>
               </View>
 
               <View style={styles.cardItemRight}>
@@ -251,10 +260,18 @@ export default function Index() {
             <Text style={{ fontSize: 13, flex: 1 }}>
               Stay compliant—click to add your latest health document. 📤
             </Text>
-            <Image
-              source={require("../../../assets/right-arrow.png")}
-              style={{ height: 15, width: 15, alignSelf: 'flex-end', marginLeft: 10 }}
-            />
+            <TouchableOpacity
+              onPress={() => navigation.navigate("NewMedicalRecord")}
+              style={{ alignSelf: "flex-end", marginLeft: 10 }}
+            >
+              <Image
+                source={require("../../../assets/right-arrow.png")}
+                style={{
+                  height: 15,
+                  width: 15,
+                }}
+              />
+            </TouchableOpacity>
           </View>
         </View>
 
@@ -267,18 +284,15 @@ export default function Index() {
             <Text style={{ color: "#0288D1", fontSize: 12 }}>View All</Text>
           </TouchableOpacity>
         </View>
-        
-        <ScrollView 
-          horizontal 
+
+        <ScrollView
+          horizontal
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.horizontalScrollContent}
         >
           {upcomingExpirations.map((record, index) => (
-            <View 
-              style={[
-                styles.expirationCard, 
-                { width: cardWidth }
-              ]} 
+            <View
+              style={[styles.expirationCard, { width: cardWidth }]}
               key={index}
             >
               <View style={styles.expHeader}>
@@ -299,7 +313,7 @@ export default function Index() {
                   </View>
                   <Text style={styles.detailText}>{record.date}</Text>
                 </View>
-                <View style={styles.detailRow}>
+                <View style={styles.detailRowRight}>
                   <View style={styles.iconBg}>
                     <Image
                       source={require("../../../assets/time1.png")}
@@ -312,7 +326,7 @@ export default function Index() {
             </View>
           ))}
         </ScrollView>
-        
+
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>Recent Uploads</Text>
           <TouchableOpacity>
@@ -326,7 +340,7 @@ export default function Index() {
           renderItem={renderItem}
           contentContainerStyle={{ padding: 1 }}
           scrollEnabled={false}
-          style={{ width: '100%' }}
+          style={{ width: "100%" }}
         />
       </ScrollView>
     </SafeAreaView>
@@ -336,7 +350,7 @@ export default function Index() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#f2f2f2',
+    backgroundColor: "#f2f2f2",
   },
   container: {
     flex: 1,
@@ -344,14 +358,14 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     padding: 15,
-    alignItems: 'center',
+    alignItems: "center",
   },
   topBar: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     marginBottom: 20,
-    width: '100%',
+    width: "100%",
   },
   greeting: {
     fontSize: 20,
@@ -371,7 +385,7 @@ const styles = StyleSheet.create({
   },
   summaryCard: {
     marginBottom: 20,
-    alignSelf: 'center',
+    alignSelf: "center",
   },
   cardPlaceholder: {
     height: 150,
@@ -382,13 +396,13 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: "row",
     justifyContent: "space-between",
-    width: '100%',
+    width: "100%",
   },
   rowText: {
     flexDirection: "row",
     justifyContent: "space-between",
     marginBottom: 10,
-    width: '100%',
+    width: "100%",
   },
   cardItem: {
     flexDirection: "row",
@@ -399,7 +413,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     padding: 3,
     flex: 1,
-    justifyContent: 'flex-end',
+    justifyContent: "flex-end",
     paddingRight: 20,
   },
   iconSumCard: {
@@ -468,14 +482,14 @@ const styles = StyleSheet.create({
     color: "#888",
     fontSize: 12,
     flex: 1,
-    textAlign: 'center',
+    textAlign: "center",
   },
   sectionHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     marginBottom: 10,
-    width: '100%',
+    width: "100%",
   },
   sectionTitle: {
     fontSize: 19,
@@ -486,11 +500,13 @@ const styles = StyleSheet.create({
     paddingRight: 15,
   },
   expirationCard: {
+    flex: 1,
     backgroundColor: "#0288D1",
     borderRadius: 12,
     padding: 10,
     marginRight: 10,
     height: 150,
+    width: "auto",
     marginVertical: 9,
   },
   expHeader: {
@@ -525,24 +541,31 @@ const styles = StyleSheet.create({
     fontFamily: "Poppins",
   },
   expDetails: {
-    height: 50,
+    flex: 1,
+    width: "auto",
+    height: "auto",
     flexDirection: "row",
     backgroundColor: "rgba(255, 255, 255, 0.4)",
     borderRadius: 8,
     padding: 10,
-    justifyContent: 'space-between',
+    justifyContent: "space-between",
   },
   detailRow: {
     flexDirection: "row",
     alignItems: "center",
     flex: 1,
   },
+  detailRowRight: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "flex-end",
+  },
   detailText: {
     color: "#fff",
     fontSize: 14,
     fontFamily: "Poppins",
     flex: 1,
-    flexWrap: 'wrap',
+    flexWrap: "wrap",
   },
   iconBg: {
     height: 30,
@@ -563,7 +586,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     padding: 20,
     marginBottom: 10,
-    alignSelf: 'center',
+    alignSelf: "center",
   },
   overlayLabel: {
     position: "absolute",
@@ -589,7 +612,7 @@ const styles = StyleSheet.create({
     padding: 15,
     marginBottom: 15,
     borderRadius: 12,
-    width: '100%',
+    width: "100%",
   },
   title: {
     fontSize: 16,
@@ -599,7 +622,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    width: '100%',
+    width: "100%",
   },
   dropdown: {
     marginTop: 10,

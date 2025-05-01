@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useState, useRef } from "react";
 import {
   StyleSheet,
   Text,
@@ -8,17 +8,26 @@ import {
   ScrollView,
   TouchableOpacity,
   Image,
+  Pressable,
+  TouchableWithoutFeedback,
+  Die
 } from "react-native";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { AuthContext } from "../../context/AuthContext";
 import { BASE_URL, processResponse } from "../../config";
-import Pusher from 'pusher-js';
+import Pusher from "pusher-js";
 
 const { width, height } = Dimensions.get("window");
 
 export default function MedRecords({ navigation }) {
   const { userInfo } = useContext(AuthContext);
   const [data, setData] = useState([]);
+  const [showDropdownId, setShowDropdownId] = useState(null);
+  const [showFilter, setShowFilter] = useState(false);
+  const [filterStatus, setFilterStatus] = useState("All");
+
+  const dropdownRef = useRef();
+  const filterRef = useRef();
 
   const getRecords = () => {
     try {
@@ -32,130 +41,199 @@ export default function MedRecords({ navigation }) {
         .then(processResponse)
         .then((res) => {
           const { statusCode, data } = res;
-          // console.log(data);
           if (statusCode == 200) {
             setData(data.records);
           } else {
             setData([]);
           }
-          // setData(data.records);
         });
     } catch (e) {
       console.log(e);
     }
   };
 
+  
+
   useEffect(() => {
     getRecords();
-
-    const pusher = new Pusher('a1d97d939eb60c02f4e0', {
-      cluster: 'ap1',
-    });
-    
-    const channel = pusher.subscribe('my-record');
-    channel.bind('upload-record', (data) => {
+    const pusher = new Pusher("a1d97d939eb60c02f4e0", { cluster: "ap1" });
+    const channel = pusher.subscribe("my-record");
+    channel.bind("upload-record", () => {
       getRecords();
     });
+
+    return () => {
+      channel.unbind_all();
+      channel.unsubscribe();
+    };
   }, []);
 
+  const filteredData =
+    filterStatus === "All"
+      ? data
+      : data.filter(
+          (item) =>
+            item.status.replace(/\s/g, "").toLowerCase() ===
+            filterStatus.toLowerCase()
+        );
+
+  const handleOutsidePress = () => {
+    if (showDropdownId || showFilter) {
+      setShowDropdownId(null);
+      setShowFilter(false);
+    }
+  };
+
   return (
-    <View style={styles.container}>
-      <View style={styles.searchContainer}>
-        <Ionicons
-          name="search"
-          size={20}
-          color="#888"
-          style={styles.searchIcon}
-        />
-        <TextInput
-          placeholder="Search here"
-          style={styles.searchInput}
-          placeholderTextColor="#999"
-        />
-        <Ionicons
-          name="filter"
-          size={20}
-          color="#888"
-          style={styles.filterIcon}
-        />
-      </View>
-
-      <View style={styles.cardProgress}>
-        <Text style={{ fontWeight: "600" }}>Medical Records Completion</Text>
-
-        <Text style={{ fontSize: 14, marginTop: 8 }}>
-          {data.length ?? 0} of 10 records completed
-        </Text>
-      </View>
-
-      <View style={styles.recordsHeader}>
-        <Text style={styles.headerTitle}>Medical Records</Text>
-        <View style={styles.totalBadge}>
-          <Text style={styles.totalText}>{data.length ?? 0}</Text>
+    <TouchableWithoutFeedback onPress={handleOutsidePress}>
+      <View style={styles.container}>
+        <View style={styles.searchContainer}>
+          <Ionicons
+            name="search"
+            size={20}
+            color="#000"
+            style={styles.searchIcon}
+          />
+          <TextInput
+            placeholder="Search record, status..."
+            style={styles.searchInput}
+            placeholderTextColor="#999"
+          />
+          <TouchableOpacity
+            onPress={() => {
+              setShowFilter(!showFilter);
+              setShowDropdownId(null);
+            }}
+          >
+            <Ionicons
+              name="filter"
+              size={20}
+              color="#000"
+              style={styles.filterIcon}
+            />
+          </TouchableOpacity>
         </View>
-      </View>
 
-      <ScrollView showsVerticalScrollIndicator={false}>
-        {Array.isArray(data) && data.length === 0 ? (
-          <View style={styles.noRecords}>
-            <Text style={styles.noRecordsText}>No Records Found</Text>
+        {showFilter && (
+          <View style={styles.filterMenu} ref={filterRef}>
+            {["All", "Expiringsoon", "Expired", "Completed"].map((status) => (
+              <Pressable
+                key={status}
+                onPress={() => {
+                  setFilterStatus(status);
+                  setShowFilter(false);
+                }}
+              >
+                <Text style={styles.option}>{status}</Text>
+              </Pressable>
+            ))}
           </View>
-        ) : (
-          data.map((data, i) => (
-            // console.log(data),
-            <TouchableOpacity
-              onPress={() => navigation.navigate("MedDetails")}
-            >
-              <View key={i + 1} style={styles.card}>
-                <View style={styles.cardTop}>
-                  <Image
-                    source={require("../../../assets/doc_type/x-ray.png")}
-                    style={styles.cardImage}
-                  />
-
-                  <View style={styles.cardInfo}>
-                    <Text style={styles.recordTitle} numberOfLines={1}>
-                      {data.document_type}
-                    </Text>
-                    <Text style={styles.recordDate}>{data.entry_date}</Text>
-                    <Text style={styles.recordFile} numberOfLines={1}>
-                      {data.file_name}
-                    </Text>
-                  </View>
-
-                  <View
-                    style={[
-                      styles.statusTag,
-                      styles[data.status.replace(/\s/g, "").toLowerCase()],
-                    ]}
-                  >
-                    <Text style={styles.statusText}>{data.status}</Text>
-                  </View>
-
-                  <MaterialIcons
-                    name="more-vert"
-                    size={22}
-                    color="#444"
-                    style={{ marginLeft: 5 }}
-                  />
-                </View>
-
-                <TouchableOpacity>
-                  <Text style={styles.viewMore}>View more</Text>
-                </TouchableOpacity>
-              </View>
-            </TouchableOpacity>
-          ))
         )}
-      </ScrollView>
 
-      <TouchableOpacity
-        style={styles.addfile}
-        onPress={() => navigation.navigate("NewMedicalRecord")}
-      >
-        <Ionicons name="add" size={28} color="#fff" />
-      </TouchableOpacity>
-    </View>
+        <ScrollView showsVerticalScrollIndicator={false}>
+          <View style={styles.cardProgress}>
+            <Text style={{ fontWeight: "600", color: "#fff" }}>
+              Medical Records Completion
+            </Text>
+            <Text style={{ fontSize: 14, marginTop: 8, color: "#fff" }}>
+              {data.length ?? 0} of 10 records completed
+            </Text>
+          </View>
+
+          <View style={styles.recordsHeader}>
+            <Text style={styles.headerTitle}>Medical Records</Text>
+            <View style={styles.totalBadge}>
+              <Text style={styles.totalText}>{data.length ?? 0}</Text>
+            </View>
+            <TouchableOpacity
+              style={styles.addfile}
+              onPress={() => navigation.navigate("NewMedicalRecord")}
+            >
+              <Ionicons name="add" size={35} color="#0288D1" />
+            </TouchableOpacity>
+          </View>
+
+          <View>
+            {Array.isArray(filteredData) && filteredData.length === 0 ? (
+              <View style={styles.noRecords}>
+                <Text>No Data Found</Text>
+              </View>
+            ) : (
+              filteredData.map((record, i) => (
+                <TouchableOpacity
+                  key={i}
+                  onPress={() => navigation.navigate("MedDetails")}
+                >
+                  <View style={styles.card}>
+                    <View style={styles.cardTop}>
+                      <Image
+                        source={require("../../../assets/doc_type/x-ray.png")}
+                        style={styles.cardImage}
+                      />
+                      <View style={styles.cardInfo}>
+                        <Text style={styles.recordTitle} numberOfLines={1}>
+                          {record.document_type}
+                        </Text>
+                        <Text style={styles.recordDate}>
+                          {record.entry_date}
+                        </Text>
+                        <Text style={styles.recordFile} numberOfLines={1}>
+                          {record.file_name}
+                        </Text>
+                      </View>
+
+                      <View
+                        style={[styles.statusTag, styles[record.status.replace(/\s/g, "").toLowerCase()]]}
+                      >
+                        <Text style={styles.statusText}>{record.status}</Text>
+                      </View>
+
+                      <TouchableOpacity
+                        onPress={() =>
+                          setShowDropdownId(
+                            showDropdownId === record.id ? null : record.id
+                          )
+                        }
+                      >
+                        <MaterialIcons
+                          name="more-vert"
+                          size={22}
+                          color="#444"
+                          style={{ marginLeft: 5 }}
+                        />
+                      </TouchableOpacity>
+
+                      {showDropdownId === record.id && (
+                        <View style={styles.dropdown} ref={dropdownRef}>
+                          <Pressable
+                            onPress={() => {
+                              setShowDropdownId(null);
+                              navigation.navigate("EditRecord", { record });
+                            }}
+                            style={styles.dropdownItem}
+                          >
+                            <Ionicons name="create" size={24} color="#0288D1" />
+                          </Pressable>
+                          <Pressable
+                            onPress={() => {
+                              setShowDropdownId(null);
+                              alert("Delete pressed for " + record.id);
+                            }}
+                            style={styles.dropdownItem}
+                          >
+                            <Ionicons name="trash" size={24} color="#FF0000" />
+                          </Pressable>
+                        </View>
+                      )}
+                    </View>
+                  </View>
+                </TouchableOpacity>
+              ))
+            )}
+          </View>
+        </ScrollView>
+      </View>
+    </TouchableWithoutFeedback>
   );
 }
 
@@ -179,11 +257,24 @@ const styles = StyleSheet.create({
   },
   searchInput: {
     flex: 1,
-    fontSize: 14,
+    fontSize: 13,
     color: "#000",
+    fontStyle: "italic",
   },
   filterIcon: {
     marginLeft: 8,
+  },
+  filterMenu: {
+    backgroundColor: "#fff",
+    borderRadius: 5,
+    elevation: 5,
+    marginBottom: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    position: "absolute",
+    top: 60,
+    right: 15,
+    zIndex: 99,
   },
   recordsHeader: {
     flexDirection: "row",
@@ -196,14 +287,14 @@ const styles = StyleSheet.create({
   },
   totalBadge: {
     marginLeft: 10,
-    backgroundColor: "#e1ecf4",
+    backgroundColor: "#fae8f4",
     paddingHorizontal: 10,
     paddingVertical: 3,
     borderRadius: 12,
   },
   totalText: {
     fontSize: 12,
-    color: "#007BFF",
+    color: "#d10288",
   },
   card: {
     backgroundColor: "#fff",
@@ -216,11 +307,11 @@ const styles = StyleSheet.create({
     alignItems: "flex-start",
   },
   cardImage: {
-    width: 20,
-    height: 20,
+    width: 40,
+    height: 40,
     resizeMode: "contain",
     marginRight: 10,
-    marginTop: 5,
+    borderRadius: 10,
   },
   cardInfo: {
     flex: 1,
@@ -237,7 +328,7 @@ const styles = StyleSheet.create({
   },
   recordFile: {
     fontSize: 14,
-    color: "#007BFF",
+    color: "#0288D1",
     marginBottom: 5,
   },
   statusTag: {
@@ -263,35 +354,55 @@ const styles = StyleSheet.create({
   viewMore: {
     marginTop: 5,
     fontSize: 12,
-    color: "#007BFF",
+    color: "#fae8f4",
     textAlign: "center",
     fontWeight: "bold",
   },
   addfile: {
-    position: "absolute",
-    bottom: 25,
-    right: 25,
-    backgroundColor: "#007BFF",
     width: 55,
     height: 55,
-    borderRadius: 30,
-    justifyContent: "center",
-    alignItems: "center",
-    elevation: 5,
-  },
-  cardImage: {
-    width: 40,
-    height: 40,
-    resizeMode: "contain",
-    marginRight: 10,
-    borderRadius: 10,
+    top: 8,
+    right: -100,
   },
   cardProgress: {
     height: 130,
-    width: 330,
-    backgroundColor: "#fff",
+    width: "auto",
+    backgroundColor: "#0288D1",
     borderRadius: 15,
     marginBottom: 15,
     padding: 15,
+  },
+  LottieAnimation: {
+    width: "50%",
+    height: "50%",
+    transform: [{ scale: 1.1 }],
+  },
+  dropdown: {
+    position: "absolute",
+    top: 25,
+    right: 0,
+    backgroundColor: "#fff",
+    borderWidth: 1,
+    borderColor: "#ddd",
+    borderRadius: 5,
+    elevation: 2,
+    zIndex: 5,
+    paddingVertical: 5,
+    paddingHorizontal: 8,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: 75,
+  },
+  dropdownItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 5,
+    paddingHorizontal: 5,
+  },
+  option: {
+    fontSize: 16,
+    color: "#333",
+    flexDirection: "row",
+    alignItems: "center",
   },
 });

@@ -16,6 +16,7 @@ import { SelectList } from "react-native-dropdown-select-list";
 import { BASE_URL, processResponse } from "../../config";
 import * as FileSystem from "expo-file-system";
 import { AuthContext } from "../../context/AuthContext";
+import Icon from "react-native-vector-icons/MaterialIcons";
 
 export default function NewMedicalRecord({ navigation }) {
   const { userInfo } = useContext(AuthContext);
@@ -24,9 +25,12 @@ export default function NewMedicalRecord({ navigation }) {
   const [showDocumentTypes, setShowDocumentTypes] = useState(false);
   const [file, setFile] = useState(null);
   const [expirationDate, setExpirationDate] = useState(new Date());
-  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [entryDate, setEntryDate] = useState(new Date());
+  const [showEntryPicker, setShowEntryPicker] = useState(false);
+  const [showExpirationPicker, setShowExpirationPicker] = useState(false);
   const [notes, setNotes] = useState("");
-  const [filteredDocumentTypes, setFilteredDocumentTypes] = useState(documentTypes);
+  const [filteredDocumentTypes, setFilteredDocumentTypes] =
+    useState(documentTypes);
 
   const documentTypes = [
     { key: 1, value: "Flu Vaccine" },
@@ -56,8 +60,13 @@ export default function NewMedicalRecord({ navigation }) {
 
   const handleDateChange = (event, selectedDate) => {
     const currentDate = selectedDate || expirationDate;
-    setShowDatePicker(Platform.OS === "ios");
+    setShowExpirationPicker(Platform.OS === "ios");
     setExpirationDate(currentDate);
+  };
+  const handleEntryDate = (event, selectedDate) => {
+    const currentEntryDate = selectedDate || entryDate;
+    setShowEntryPicker(Platform.OS === "ios");
+    setEntryDate(currentEntryDate);
   };
 
   const getMedicalRecordPending = () => {
@@ -110,6 +119,7 @@ export default function NewMedicalRecord({ navigation }) {
         document_type: documentType,
         note: notes,
         exp_date: expirationDate,
+        entry_date: entryDate,
         file: {
           name: file[0].name,
           type: file[0].mimeType,
@@ -120,7 +130,7 @@ export default function NewMedicalRecord({ navigation }) {
       .then(processResponse)
       .then((res) => {
         const { statusCode, data } = res;
-        navigation.goBack();
+        navigation.navigate("MedRecords", { refresh: true });
       });
   };
 
@@ -148,35 +158,58 @@ export default function NewMedicalRecord({ navigation }) {
         save="value"
       />
 
-      <View style={styles.previewContainer}>
-        {file && file[0].name && (
-          <View style={styles.filePreview}>
-            <Text numberOfLines={1} style={styles.fileName}>
-              {file[0].name}
-            </Text>
+      <View style={{ marginTop: 20 }}>
+        <Text style={styles.label}>Upload File</Text>
+
+        <TouchableOpacity style={styles.uploadButton} onPress={pickDocument}>
+          <Text style={styles.uploadButtonText}>
+            {file && file[0]?.name ? "Change File" : "Select File"}
+          </Text>
+        </TouchableOpacity>
+
+        {file && file[0]?.name && (
+          <View style={styles.previewContainer}>
+            <View style={styles.filePreview}>
+              <Text numberOfLines={1} style={styles.fileName}>
+                {file[0].name}
+              </Text>
+              <TouchableOpacity onPress={() => setFile(null)}>
+                <Icon name="close" size={20} color="#ff3333" />
+              </TouchableOpacity>
+            </View>
           </View>
         )}
       </View>
 
-      <Text style={styles.label}>Upload File</Text>
-      <TouchableOpacity style={styles.uploadButton} onPress={pickDocument}>
-        <Text style={styles.uploadButtonText}>
-          {file ? "Change File" : "Select File"}
-        </Text>
+      <Text style={styles.label}>Entry Date</Text>
+      <TouchableOpacity
+        style={styles.dateInput}
+        onPress={() => setShowEntryPicker(true)}
+      >
+        <Text style={styles.dateText}>{entryDate.toLocaleDateString()}</Text>
+        <Ionicons name="calendar" size={20} color="#01466c" />
       </TouchableOpacity>
+      {showEntryPicker && (
+        <DateTimePicker
+          value={entryDate}
+          mode="date"
+          display="default"
+          onChange={handleEntryDate}
+        />
+      )}
 
       <Text style={styles.label}>Expiration Date</Text>
       <TouchableOpacity
         style={styles.dateInput}
-        onPress={() => setShowDatePicker(true)}
+        onPress={() => setShowExpirationPicker(true)}
       >
         <Text style={styles.dateText}>
           {expirationDate.toLocaleDateString()}
         </Text>
-        <Ionicons name="calendar" size={20} color="#007BFF" />
+        <Ionicons name="calendar" size={20} color="#01466c" />
       </TouchableOpacity>
 
-      {showDatePicker && (
+      {showExpirationPicker && (
         <DateTimePicker
           value={expirationDate}
           mode="date"
@@ -185,12 +218,12 @@ export default function NewMedicalRecord({ navigation }) {
         />
       )}
 
-      <Text style={styles.label}>Notes</Text>
+      <Text style={styles.label}>Note</Text>
       <TextInput
         style={styles.notesInput}
         value={notes}
         onChangeText={setNotes}
-        placeholder="Add any additional notes here"
+        placeholder="Add any additional notes here..."
         multiline
         numberOfLines={4}
       />
@@ -204,7 +237,7 @@ export default function NewMedicalRecord({ navigation }) {
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.submitButton} onPress={handleUpload}>
-          <Text style={styles.submitButtonText}>Upload</Text>
+          <Text style={styles.submitButtonText}>Submit</Text>
         </TouchableOpacity>
       </View>
     </ScrollView>
@@ -221,12 +254,12 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: "bold",
     marginBottom: 20,
-    color: "#333",
+    color: "#01466c",
   },
   label: {
     fontSize: 16,
     marginBottom: 8,
-    color: "#007BFF",
+    color: "#01466c",
   },
   input: {
     backgroundColor: "#fff",
@@ -234,7 +267,7 @@ const styles = StyleSheet.create({
     padding: 12,
     marginBottom: 16,
     borderWidth: 1,
-    borderColor: "#ddd",
+    borderColor: "#01466c",
   },
   dropdown: {
     backgroundColor: "#fff",
@@ -242,23 +275,23 @@ const styles = StyleSheet.create({
     padding: 12,
     marginBottom: 8,
     borderWidth: 1,
-    borderColor: "#ddd",
+    borderColor: "#01466c",
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
   },
   dropdownText: {
-    color: "#333",
+    color: "#01466c",
   },
   dropdownPlaceholder: {
-    color: "#999",
+    color: "#01466c",
   },
   dropdownList: {
     backgroundColor: "#fff",
     borderRadius: 8,
     marginBottom: 16,
     borderWidth: 1,
-    borderColor: "#ddd",
+    borderColor: "#01466c",
     maxHeight: 200,
   },
   dropdownItem: {
@@ -271,35 +304,36 @@ const styles = StyleSheet.create({
   },
   previewContainer: {
     height: 100,
-    backgroundColor: "#e6f7ff",
     borderRadius: 8,
     marginBottom: 16,
     justifyContent: "center",
     alignItems: "center",
   },
   filePreview: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     padding: 10,
     backgroundColor: "#fff",
-    borderRadius: 4,
-    borderWidth: 1,
-    borderColor: "#ddd",
+    borderRadius: 20,
     width: "80%",
   },
+
   fileName: {
     textAlign: "center",
     color: "#333",
   },
   uploadButton: {
-    backgroundColor: "#fff",
+    backgroundColor: "#0288D1",
     borderRadius: 8,
     padding: 12,
     marginBottom: 16,
     borderWidth: 1,
-    borderColor: "#ddd",
+    borderColor: "#0288D1",
     alignItems: "center",
   },
   uploadButtonText: {
-    color: "#007BFF",
+    color: "#ffff",
   },
   dateInput: {
     backgroundColor: "#fff",
@@ -307,7 +341,7 @@ const styles = StyleSheet.create({
     padding: 12,
     marginBottom: 16,
     borderWidth: 1,
-    borderColor: "#ddd",
+    borderColor: "#01466c",
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
@@ -321,7 +355,7 @@ const styles = StyleSheet.create({
     padding: 12,
     marginBottom: 20,
     borderWidth: 1,
-    borderColor: "#ddd",
+    borderColor: "#01466c",
     height: 100,
     textAlignVertical: "top",
   },
@@ -331,7 +365,9 @@ const styles = StyleSheet.create({
     marginBottom: 30,
   },
   cancelButton: {
-    backgroundColor: "#e0e0e0",
+    backgroundColor: "#fff",
+    borderWidth: 1,
+    borderColor: "#0288D1",
     borderRadius: 8,
     padding: 15,
     width: "48%",
@@ -342,7 +378,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   submitButton: {
-    backgroundColor: "#007BFF",
+    backgroundColor: "#0288D1",
     borderRadius: 8,
     padding: 15,
     width: "48%",

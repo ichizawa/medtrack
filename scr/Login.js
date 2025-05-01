@@ -13,17 +13,18 @@ import {
   Keyboard,
   ScrollView,
   SafeAreaView,
+
 } from "react-native";
 import React, { useState, useEffect, useContext } from "react";
 import { AuthContext } from "./context/AuthContext";
 
-// Get dimensions but we'll also handle orientation changes
 const window_width = Dimensions.get("window").width;
 const window_height = Dimensions.get("window").height;
 
+
 export default function Login({ navigation }) {
   const { login } = useContext(AuthContext);
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isRememberMe, setIsRememberMe] = useState(false);
   const [dimensions, setDimensions] = useState({
@@ -39,14 +40,14 @@ export default function Login({ navigation }) {
         window_height: window.height,
       });
     });
-    
+
     return () => subscription?.remove();
   }, []);
 
   const handleLogin = () => {
     // For static login, we'll just navigate to Home
     // You can still call the login function if you want to maintain the context
-    login(username, password);
+    login(email, password);
     // navigation.navigate('Home');
   };
 
@@ -56,91 +57,73 @@ export default function Login({ navigation }) {
   return (
     <SafeAreaView style={styles.safeArea}>
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <KeyboardAvoidingView 
+        <KeyboardAvoidingView
           behavior={Platform.OS === "ios" ? "padding" : "height"}
           style={styles.container}
         >
-          <StatusBar barStyle="light-content" backgroundColor="#0288D1" />
-          
-          <ScrollView 
+          <StatusBar barStyle="dark-content" backgroundColor="#fff" />
+
+          <ScrollView
             contentContainerStyle={styles.scrollContainer}
             showsVerticalScrollIndicator={false}
           >
-            <View style={[
-              styles.headerContainer, 
-              isLargeScreen && styles.headerContainerLarge
-            ]}>
-             <View>
-              <View></View>
-              <Text>Log in</Text>
-             </View>
+            <View style={styles.headerContainer}>
+              <View style={styles.motorcycleContainer}>
+                <Image
+                  source={require("../assets/login/login_logo.png")}
+                  
+                  style={styles.LottieAnimation}
+                />
+              </View>
             </View>
 
-            <View style={[
-              styles.formContainer,
-              isLargeScreen && styles.formContainerLarge
-            ]}>
+            <View style={styles.formContainer}>
               <View style={styles.inputContainer}>
-                <Text style={styles.inputLabel}>Username</Text>
                 <TextInput
-                  style={[
-                    styles.input,
-                    isLargeScreen && styles.inputLarge
-                  ]}
-                  // value={username}
-                  onChangeText={setUsername}
-                  placeholder="Enter your username"
-                  placeholderTextColor="#AED5EA"
-                  // keyboardType="email-address"
+                  style={styles.input}
+                  onChangeText={setEmail}
+                  placeholder="Email"
+                  placeholderTextColor="#ccc"
+                  keyboardType="email-address"
                   autoCapitalize="none"
                 />
               </View>
-              
               <View style={styles.inputContainer}>
-                <Text style={styles.inputLabel}>Password</Text>
                 <TextInput
-                  style={[
-                    styles.input,
-                    isLargeScreen && styles.inputLarge
-                  ]}
-                  // value={password}
+                  style={styles.input}
                   onChangeText={setPassword}
-                  placeholder="Enter your password"
-                  placeholderTextColor="#AED5EA"
+                  placeholder="Password"
+                  placeholderTextColor="#ccc"
                   secureTextEntry
                 />
               </View>
-
-              <View style={styles.row}>
-                <TouchableOpacity 
-                  style={styles.rememberMeContainer} 
-                  onPress={() => setIsRememberMe(!isRememberMe)}
-                >
-                  <View style={[styles.checkbox, isRememberMe && styles.checkboxChecked]}>
-                    {isRememberMe && <Text style={styles.checkmark}>✓</Text>}
-                  </View>
-                  <Text style={styles.rememberMe}>Remember me</Text>
-                </TouchableOpacity>
-                
-                <TouchableOpacity>
-                  <Text style={styles.forgotPassword}>Forgot password?</Text>
-                </TouchableOpacity>
-              </View>
-
               <TouchableOpacity
-                style={[
-                  styles.loginButton,
-                  isLargeScreen && styles.loginButtonLarge
-                ]}
+                style={styles.loginButton}
                 onPress={handleLogin}
               >
-                <Text style={styles.loginButtonText}>Log in</Text>
+                <Text style={styles.loginButtonText}>Sign In</Text>
               </TouchableOpacity>
-
-              <View style={styles.registerContainer}>
-                <Text style={styles.registerText}>Don't have an account?</Text>
-                <TouchableOpacity onPress={() => navigation.navigate('Register')}>
-                  <Text style={styles.registerLink}>Sign up</Text>
+              <TouchableOpacity style={styles.forgotPasswordContainer}>
+                <Text style={styles.forgotPasswordText}>Forgot password?</Text>
+              </TouchableOpacity>
+              <View style={styles.signup}>
+                <Text
+                  style={{ color: "#cccccc", fontSize: 12, marginRight: 5 }}
+                >
+                  Don't have an account?
+                </Text>
+                <TouchableOpacity
+                 onPress={() => navigation.navigate("Register")}
+                >
+                  <Text
+                    style={{
+                      color: "#0288D1",
+                      fontSize: 12,
+                      fontWeight: "bold",
+                    }}
+                  >
+                    Sign Up
+                  </Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -154,201 +137,73 @@ export default function Login({ navigation }) {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
   },
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
   },
   scrollContainer: {
     flexGrow: 1,
   },
   headerContainer: {
-    width: '100%',
+    width: "100%",
+    height: 290,
+    position: "relative",
   },
-  headerContainerLarge: {
-    maxHeight: 300,
+  headerImage: {
+    width: "100%",
+    height: "100%",
   },
-  blobShape: {
-    backgroundColor: '#0288D1',
-    height: 230,
-    borderBottomRightRadius: 600,
-    borderBottomLeftRadius: -10,
-    paddingTop: 70,
-    paddingLeft: 30,
-    flex: 1,
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.3,
-    shadowRadius: 4.65,
-    elevation: 8,
+  motorcycleContainer: {
+    position: "absolute",
+    bottom: 10,
+    width: 400,
+    height: 180,
+    zIndex: 10,
   },
-  blobShapeLarge: {
-    height: 280,
-    paddingTop: 100,
-    paddingLeft: 60,
-  },
-  headerTitle: {
-    color: '#fff',
-    fontSize: 20,
-    fontWeight: '400',
-  },
-  headerTitleLarge: {
-    fontSize: 26,
-  },
-  headerSubtitle: {
-    color: '#fff',
-    fontSize: 34,
-    fontWeight: 'bold',
-    marginTop: 5,
-  },
-  headerSubtitleLarge: {
-    fontSize: 48,
-  },
-  logoCircle: {
-    position: 'absolute',
-    bottom: -25,
-    left: 30,
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-    elevation: 5,
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-  },
-  logoCircleLarge: {
-    width: 70,
-    height: 70,
-    borderRadius: 35,
-    bottom: -35,
-    left: 60,
-  },
-  logoIcon: {
-    fontSize: 24,
-    color: '#0288D1',
-  },
-  logoIconLarge: {
-    fontSize: 32,
+  LottieAnimation: {
+    width: "100%",
+    height: "100%",
   },
   formContainer: {
     paddingHorizontal: 30,
-    marginTop: 80,
-    width: '100%',
-  },
-  formContainerLarge: {
-    marginTop: 120,
-    alignSelf: 'center',
-    maxWidth: 500,
+    paddingTop: 100,
   },
   inputContainer: {
     marginBottom: 20,
   },
-  inputLabel: {
-    fontSize: 14,
-    color: '#7E6D8D',
-    marginBottom: 8,
-    fontWeight: '500',
-  },
   input: {
-    borderBottomWidth: 1,
-    borderColor: '#AED5EA',
+    backgroundColor: "#f5f5f5",
+    borderRadius: 8,
+    padding: 15,
     fontSize: 16,
-    paddingVertical: 8,
-    color: '#333',
-  },
-  inputLarge: {
-    fontSize: 18,
-    paddingVertical: 12,
-  },
-  row: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 30,
-    marginTop: 10,
-  },
-  rememberMeContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  checkbox: {
-    width: 18,
-    height: 18,
-    borderWidth: 1,
-    borderColor: '#AED5EA',
-    borderRadius: 4,
-    marginRight: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  checkboxChecked: {
-    backgroundColor: '#0288D1',
-    borderColor: '#0288D1',
-  },
-  checkmark: {
-    color: '#fff',
-    fontSize: 12,
-    fontWeight: 'bold',
-  },
-  rememberMe: {
-    color: '#7E6D8D',
-    fontSize: 14,
-  },
-  forgotPassword: {
-    color: '#0288D1',
-    fontWeight: '600',
-    fontSize: 14,
+    color: "#333",
   },
   loginButton: {
-    backgroundColor: '#0288D1',
-    borderRadius: 10,
-    paddingVertical: 14,
-    alignItems: 'center',
-    marginBottom: 25,
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
-  loginButtonLarge: {
-    paddingVertical: 16,
+    backgroundColor: "#0288D1",
+    borderRadius: 8,
+    paddingVertical: 15,
+    alignItems: "center",
+    marginTop: 10,
+    marginBottom: 20,
   },
   loginButtonText: {
-    color: '#fff',
-    fontWeight: 'bold',
+    color: "#fff",
+    fontWeight: "bold",
     fontSize: 16,
   },
-  registerContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    marginTop: 10,
-    marginBottom: 30,
+  forgotPasswordContainer: {
+    alignItems: "center",
   },
-  registerText: {
-    color: '#7E6D8D',
-    fontSize: 14,
+  forgotPasswordText: {
+    color: "#0288D1",
+    fontSize: 12,
   },
-  registerLink: {
-    color: '#0288D1',
-    fontWeight: '600',
-    marginLeft: 5,
-    fontSize: 14,
+  signup: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",             
+    marginTop: 20, 
   },
 });
-
-
